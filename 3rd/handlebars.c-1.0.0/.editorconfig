@@ -1,0 +1,38 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.ac]
+indent_style = tab
+
+[*.am]
+indent_style = tab
+
+[*.m4]
+indent_style = tab
+
+[*.sh]
+indent_style = tab
+
+[*.hbs]
+insert_final_newline = false
+
+[Makefile]
+indent_style = tab
+
+[.gitattributes]
+indent_style = tab
+indent_size = 8
+
+[.appveyor.yml]
+end_of_line = crlf
+
+[*.nix]
+indent_size = 2
+indent_style = space

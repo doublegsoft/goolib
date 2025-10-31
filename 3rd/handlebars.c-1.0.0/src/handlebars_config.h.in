@@ -1,0 +1,83 @@
+/**
+ * Copyright (C) 2016 John Boehr
+ *
+ * This file is part of handlebars.c.
+ *
+ * handlebars.c is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * handlebars.c is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with handlebars.c.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#ifndef HANDLEBARS_CONFIG_H
+#define HANDLEBARS_CONFIG_H
+
+#ifndef HANDLEBARS_VERSION_MAJOR
+#undef HANDLEBARS_VERSION_MAJOR
+#endif
+
+#ifndef HANDLEBARS_VERSION_MINOR
+#undef HANDLEBARS_VERSION_MINOR
+#endif
+
+#ifndef HANDLEBARS_VERSION_PATCH
+#undef HANDLEBARS_VERSION_PATCH
+#endif
+
+#ifndef HANDLEBARS_VERSION_STRING
+#undef HANDLEBARS_VERSION_STRING
+#endif
+
+#ifndef HANDLEBARS_VERSION_INT
+#undef HANDLEBARS_VERSION_INT
+#endif
+
+/* Disable refcounting of handlebars values */
+#ifndef HANDLEBARS_NO_REFCOUNT
+#undef HANDLEBARS_NO_REFCOUNT
+#endif
+
+/* Enable handlebars memory testing functions */
+#ifndef HANDLEBARS_MEMORY
+#undef HANDLEBARS_MEMORY
+#endif
+
+/* Enable JSON support */
+#ifndef HANDLEBARS_HAVE_JSON
+#undef HANDLEBARS_HAVE_JSON
+#endif
+
+/* Enable LMDB support */
+#ifndef HANDLEBARS_HAVE_LMDB
+#undef HANDLEBARS_HAVE_LMDB
+#endif
+
+/* Enable PCRE support */
+#ifndef HANDLEBARS_HAVE_PCRE
+#undef HANDLEBARS_HAVE_PCRE
+#endif
+
+/* Enable pthread support */
+#ifndef HANDLEBARS_HAVE_PTHREAD
+#undef HANDLEBARS_HAVE_PTHREAD
+#endif
+
+/* Enable YAML support */
+#ifndef HANDLEBARS_HAVE_YAML
+#undef HANDLEBARS_HAVE_YAML
+#endif
+
+/* Enable handlebars debugging */
+#ifndef HANDLEBARS_ENABLE_DEBUG
+#undef HANDLEBARS_ENABLE_DEBUG
+#endif
+
+#endif

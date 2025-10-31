@@ -1,0 +1,8 @@
+export DYLD_LIBRARY_PATH=/Users/christian/export/local/works/doublegsoft.open/goolib/03.Development/goolib/3rd/openssl-3.6.0/build/darwin/:$DYLD_LIBRARY_PATH
+
+build/darwin/goo-zip-dir -d /Users/christian/export/local/works/koron.com/abpms/03.Development/abpms-java/ABPMS/DACSL-ABPMS/target/classes/pdf \
+  -z /Users/christian/export/local/works/koron.com/abpms/03.Development/abpms-java/ABPMS/DACSL-ABPMS/target/classes/pdf.zip
+
+build/darwin/goo-mail-send -s smtp.qq.com -p 465 -u 598807227@qq.com -a dxufwgbzlwghbehc \
+  -f 598807227@qq.com -t 598807227@qq.com -j 账单PDF升级 \
+  -m /Users/christian/export/local/works/koron.com/abpms/03.Development/abpms-java/ABPMS/DACSL-ABPMS/target/classes/pdf.zip

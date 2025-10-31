@@ -1,0 +1,13 @@
+struct handlebars_builtin_pair { const char * name; int pos; };
+%define hash-function-name hbs_builtin_lut_hash
+%define lookup-function-name hbs_builtin_lut_lookup
+%%
+blockHelperMissing,0
+helperMissing,1
+each,2
+if,3
+unless,4
+with,5
+log,6
+lookup,7
+hbsc_set_delimiters,8
