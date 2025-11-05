@@ -20,7 +20,7 @@ extern "C" {
 #endif
 
 int 
-goo_proc_exec(const char* command, char** error);
+goo_proc_exec(const char* command, char** out, char** error);
 
 #ifdef __cplusplus
 }

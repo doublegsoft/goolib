@@ -82,7 +82,7 @@ goo_thread_reader(void* arg) {
 }
 
 int
-goo_proc_exec(const char* command, char** error) 
+goo_proc_exec(const char* command, char** out, char** err) 
 {
   int stdout_pipe[2];
   int stderr_pipe[2];
@@ -125,6 +125,7 @@ goo_proc_exec(const char* command, char** error)
   close(stdout_pipe[0]); 
   close(stderr_pipe[0]);
 
-  printf("%s", r.err_buf);
+  *out = r.out_buf;
+  *err = r.err_buf;
   return GOO_SUCCESS;
 } 

@@ -20,7 +20,8 @@
 
 int main(int argc, char* argv[]) 
 {
-  char* error = NULL;
-  int rc = goo_proc_exec("/usr/bin/java -version", &error);
+  char* out = NULL;
+  char* err = NULL;
+  int rc = goo_proc_exec("/usr/bin/java -version", &out, &err);
   return GOO_SUCCESS; 
 }

@@ -74,6 +74,47 @@ set(OPENSSL_LIBRARIES           crypto ssl)
 
 ################################################################################
 ##                                                                            ##
+##                                   poppler                                  ##
+##                                                                            ##
+################################################################################
+set(POLLOPER_DIR                "3rd/poppler-25.10.0")
+set(POLLOPER_INCLUDE_DIR        "${POLLOPER_DIR}"
+                                "${POLLOPER_DIR}/poppler"
+                                "${POLLOPER_DIR}/${BUILD}"
+                                "${POLLOPER_DIR}/${BUILD}/poppler")
+set(POLLOPER_LIBRARY_DIR        "${POLLOPER_DIR}/${BUILD}")
+set(POLLOPER_LIBRARIES          poppler)
+
+################################################################################
+##                                                                            ##
+##                                    xpdf                                    ##
+##                                                                            ##
+################################################################################
+set(XPDF_DIR                "3rd/xpdf-4.05")
+set(XPDF_INCLUDE_DIR        "${XPDF_DIR}/xpdf"
+                            "${XPDF_DIR}/goo"
+                            "${XPDF_DIR}/fofi"
+                            "${XPDF_DIR}/splash"
+                            "${XPDF_DIR}/${BUILD}")
+set(XPDF_LIBRARY_DIR        "${XPDF_DIR}/${BUILD}/xpdf"
+                            "${XPDF_DIR}/${BUILD}/splash"
+                            "${XPDF_DIR}/${BUILD}/fofi"
+                            "${XPDF_DIR}/${BUILD}/goo")
+set(XPDF_LIBRARIES          xpdf fofi splash goo1)
+
+################################################################################
+##                                                                            ##
+##                                   libpng                                   ##
+##                                                                            ##
+################################################################################
+set(LIBPNG_DIR              "3rd/libpng-1.6.50")
+set(LIBPNG_INCLUDE_DIR      "${LIBPNG_DIR}"
+                            "${LIBPNG_DIR}/${BUILD}")
+set(LIBPNG_LIBRARY_DIR      "${LIBPNG_DIR}/${BUILD}")
+set(LIBPNG_LIBRARIES        png)
+
+################################################################################
+##                                                                            ##
 ##                                    cjson                                   ##
 ##                                                                            ##
 ################################################################################
@@ -95,11 +136,21 @@ set(JVM_LIBRARIES           jvm)
 
 ################################################################################
 ##                                                                            ##
+##                                   gfc                                      ##
+##                                                                            ##
+################################################################################
+set(GFC_DIR                 "3rd/gfc-0.1.2")
+set(GFC_INCLUDE_DIR         "${GFC_DIR}/include")
+set(GFC_LIBRARY_DIR         "${GFC_DIR}/${BUILD}")
+set(GFC_LIBRARIES           gfc)
+
+################################################################################
+##                                                                            ##
 ##                                    others                                  ##
 ##                                                                            ##
 ################################################################################
-
-set(OTHER_LIBRARIES         z)
+set(OTHER_LIBRARY_DIR       "/opt/homebrew/Cellar/fontconfig/2.17.1/lib")
+set(OTHER_LIBRARIES         z fontconfig)
 
 ################################################################################
 ##                                                                            ##
@@ -115,6 +166,7 @@ set(GOOLIB_SOURCES
   "src/goolib-ssh.c"
   "src/goolib-jvm.c"
   "src/goolib-proc.c"
+  "src/goolib-png.c"
   "src/internal/smtp.c"
 )
 
@@ -125,6 +177,10 @@ include_directories(
   ${ARGPARSE_INCLUDE_DIR}
   ${MINIZIP_INCLUDE_DIR}
   ${JVM_INCLUDE_DIR}
+  ${CJSON_INCLUDE_DIR}
+  ${GFC_INCLUDE_DIR}
+  ${XPDF_INCLUDE_DIR}
+  ${LIBPNG_INCLUDE_DIR}
 )
 
 link_directories(
@@ -134,6 +190,11 @@ link_directories(
   ${MINIZIP_LIBRARY_DIR}
   ${CURL_LIBRARY_DIR}
   ${JVM_LIBRARY_DIR}
+  ${CJSON_LIBRARY_DIR}
+  ${XPDF_LIBRARY_DIR}
+  ${LIBPNG_LIBRARY_DIR}
+  ${GFC_LIBRARY_DIR}
+  ${OTHER_LIBRARY_DIR}
 )
 
 add_library(goo STATIC ${GOOLIB_SOURCES})
@@ -145,7 +206,11 @@ target_link_libraries(goo_shared
   ${OPENSSL_LIBRARIES}
   ${MINIZIP_LIBRARIES}
   ${CURL_LIBRARIES}
+  ${XPDF_LIBRARIES}
+  ${CJSON_LIBRARIES}
+  ${LIBPNG_LIBRARIES}
   ${JVM_LIBRARIES}
+  ${GFC_LIBRARIES}
   ${OTHER_LIBRARIES}
 )
 
@@ -252,5 +317,18 @@ add_executable(goo-llm-gemini
 target_link_libraries(goo-llm-gemini
   goo
   ${CURL_LIBRARIES}
+)
+
+add_executable(goo-pdf-crop
+  "tool/goo-pdf-crop.c"
+)
+
+target_link_libraries(goo-pdf-crop
+  goo
+  ${ARGPARSE_LIBRARIES}
+  ${XPDF_LIBRARIES}
+  ${LIBPNG_LIBRARIES}
+  ${GFC_LIBRARIES} 
+  ${CJSON_LIBRARIES}
 )
 
