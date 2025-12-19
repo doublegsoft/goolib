@@ -283,6 +283,25 @@ target_link_libraries(goo-jvm-java
   ${JVM_LIBRARIES}
 )
 
+add_executable(goo-proc-execute
+  "tool/goo-proc-execute.c"
+)
+
+target_link_libraries(goo-proc-execute
+  goo
+  ${ARGPARSE_LIBRARIES}
+)
+
+add_executable(goo-proc-copy
+  "tool/goo-proc-copy.c"
+)
+
+target_link_libraries(goo-proc-copy
+  goo
+  ${ARGPARSE_LIBRARIES}
+  ${GFC_LIBRARIES}
+)
+
 add_executable(goo-proc-javac
   "tool/goo-proc-javac.c"
 )

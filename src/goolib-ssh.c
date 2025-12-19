@@ -31,12 +31,13 @@
 #include "goolib-error.h"
 #include "goolib-ssh.h"
 
-int goo_ssh_execute(const char* host, 
-                    int port,
-                    const char* user, 
-                    const char* password,
-                    const char* command,
-                    char** error)
+int goo_ssh_execute(const char*   host, 
+                    int           port,
+                    const char*   user, 
+                    const char*   password,
+                    const char*   command,
+                    char**        out,
+                    char**        err)
 {
   uint32_t hostaddr = inet_addr(host);
   libssh2_socket_t sock;
@@ -118,18 +119,23 @@ int goo_ssh_execute(const char* host,
 
   char buffer[1024];
   ssize_t bytes_read;
+  size_t out_len;
+  size_t err_len;
 
-  // Read standard output
-  fprintf(stderr, "Standard Output:\n");
-  while ((bytes_read = libssh2_channel_read(channel, buffer, sizeof(buffer))) > 0) {
-    fwrite(buffer, 1, bytes_read, stdout);
+  FILE* out_st = open_memstream(out, &out_len);
+  FILE* err_st = open_memstream(err, &err_len);
+
+  while ((bytes_read = libssh2_channel_read(channel, buffer, sizeof(buffer))) > 0) 
+  {
+    fwrite(buffer, 1, bytes_read, out_st);
   }
 
-  // Read standard error (optional)
-  fprintf(stderr, "\nStandard Error:\n");
-  while ((bytes_read = libssh2_channel_read_stderr(channel, buffer, sizeof(buffer))) > 0) {
-    fwrite(buffer, 1, bytes_read, stderr);
+  while ((bytes_read = libssh2_channel_read_stderr(channel, buffer, sizeof(buffer))) > 0) 
+  {
+    fwrite(buffer, 1, bytes_read, err_st);
   }
+  fclose(out_st);
+  fclose(err_st);
 
   libssh2_channel_close(channel);
   libssh2_channel_free(channel);

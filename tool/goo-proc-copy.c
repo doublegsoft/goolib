@@ -12,24 +12,43 @@
 ** ─██░░░░░░░░░░██─██░░░░░░░░░░██─██░░░░░░░░░░██─██░░░░░░░░░░██─██░░░░░░██─██░░░░░░░░░░░░██─
 ** ─██████████████─██████████████─██████████████─██████████████─██████████─████████████████─
 */
-#ifndef GOOLIB_SSH_H
-#define GOOLIB_SSH_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <stdio.h>
+#include <stdlib.h>
+#include <argparse.h>
 
-int 
-goo_ssh_execute(const char*     host, 
-                int             port,
-                const char*     user, 
-                const char*     password,
-                const char*     command,
-                char**          out,
-                char**          err);
+#include <gfc.h>
 
-#ifdef __cplusplus
+#include "goolib-error.h"
+
+static const char *const usages[] = 
+{
+  "goo-proc-copy [options]",
+  NULL,
+};
+
+int main(int argc, char* argv[]) 
+{
+  char* src = NULL;
+  char* dst = NULL;
+
+  struct argparse_option options[] = {
+    OPT_HELP(),
+    OPT_STRING('s', "source", &src, "the source directory", NULL, 0, 0),
+    OPT_STRING('d', "destin", &dst, "the destination directory", NULL, 0, 0),
+    OPT_END(),
+  };
+  struct argparse argparse;
+  argparse_init(&argparse, options, usages, 0);
+  argparse_describe(&argparse, "\nCopy directory or file.", NULL);
+  
+  argc = argparse_parse(&argparse, argc, (const char**) argv);
+  if (src == NULL || dst == NULL) 
+  {
+    argparse_usage(&argparse);
+    return GOO_ERROR_FAILURE;
+  }
+
+  gfc_fs_mv(src, dst);
+  return GOO_SUCCESS; 
 }
-#endif
-
-#endif /* GOOLIB_SSH_H */

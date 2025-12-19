@@ -266,7 +266,8 @@ goo_mail_latest(const char* mail_imap_host,
   int found_attachment = 0;
   int start_attachment = 0;
 
-  while (fgets(line, 1024, fp) != NULL) {
+  while (fgets(line, 1024, fp) != NULL) 
+  {
     if (strstr(line, "Content-Type: application") != NULL)
     {
       found_attachment = 1;

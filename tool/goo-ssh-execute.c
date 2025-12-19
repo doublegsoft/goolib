@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <argparse.h>
+#include <string.h>
 
 #include "goolib-error.h"
 #include "goolib-ssh.h"
@@ -59,17 +60,21 @@ int main(int argc, char* argv[])
     return GOO_ERROR_FAILURE;
   }
 
-  char* error = NULL;
+  char* err = NULL;
+  char* out = NULL;
   int rc = goo_ssh_execute(host, port, 
                            username, password, 
                            command,
-                           &error);
-  if (rc != GOO_SUCCESS)
+                           &out, &err);
+  if (out != NULL && strlen(err) > 0)
   {
-    fprintf(stderr, "Error: %s\n", error);
-    if (error != NULL)
-      free(error);
-    return GOO_ERROR_FAILURE;
+    printf("%s", out);
+    free(out);
+  }
+  if (err != NULL && strlen(err) > 0)
+  {
+    printf("%s", err);
+    free(err);
   }
   return GOO_SUCCESS; 
 }
