@@ -20,6 +20,20 @@
 extern "C" {
 #endif
 
+/*!
+** Converts a Hex color string to RGB integers.
+**
+** Supports formats: "#ffffff", "ffffff", "#FFF", "FFF"
+** Case insensitive (A-F, a-f).
+**
+** @param hex_str Input string (e.g., "#FF0000")
+** @param r       Pointer to store Red (0-255)
+** @param g       Pointer to store Green (0-255)
+** @param b       Pointer to store Blue (0-255)
+*/
+void 
+goo_color_hex2rgb(const char* hex_str, int* r, int* g, int* b);
+
 int
 goo_util_b64_to_file(const char* b64, 
                      const char* file, 

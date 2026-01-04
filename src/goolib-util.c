@@ -27,24 +27,42 @@ goo_util_b64_to_file(const char* b64txt,
                      char** error)
 {
   
-  FILE* fp = fopen(file, "wb");
-  BIO* src = BIO_new_mem_buf(b64txt, (int)strlen(b64txt));
-  BIO* b64 = BIO_new(BIO_f_base64());
-  BIO* chain = BIO_push(b64, src); 
-  unsigned char buf[4096];
-  int n;
-  while ((n = BIO_read(chain, buf, sizeof(buf))) > 0) 
-  {
-    size_t written = fwrite(buf, 1, (size_t)n, fp);
-    if (written != (size_t)n) 
-    {
-      perror("fwrite");
-      BIO_free_all(chain);
-      fclose(fp);
-      return GOO_ERROR_FAILURE;
-    }
-  } 
-  BIO_free_all(chain);
-  fclose(fp);
+  // FILE* fp = fopen(file, "wb");
+  // BIO* src = BIO_new_mem_buf(b64txt, (int)strlen(b64txt));
+  // BIO* b64 = BIO_new(BIO_f_base64());
+  // BIO* chain = BIO_push(b64, src); 
+  // unsigned char buf[4096];
+  // int n;
+  // while ((n = BIO_read(chain, buf, sizeof(buf))) > 0) 
+  // {
+  //   size_t written = fwrite(buf, 1, (size_t)n, fp);
+  //   if (written != (size_t)n) 
+  //   {
+  //     perror("fwrite");
+  //     BIO_free_all(chain);
+  //     fclose(fp);
+  //     return GOO_ERROR_FAILURE;
+  //   }
+  // } 
+  // BIO_free_all(chain);
+  // fclose(fp);
   return GOO_SUCCESS;
+}
+
+void 
+goo_color_hex2rgb(const char* hex_str, int* r, int* g, int* b) 
+{
+  if (!hex_str || !r || !g || !b) return;
+
+  const char* p = hex_str;
+  if (p[0] == '#') {
+    p++;
+  }
+
+  if (sscanf(p, "%02x%02x%02x", r, g, b) != 3) 
+  {
+    *r = 0;
+    *g = 0;
+    *b = 0;
+  }
 }

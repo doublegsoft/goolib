@@ -220,6 +220,37 @@ target_link_libraries(goo_shared
 ##                                                                            ##
 ################################################################################
 
+add_executable(goo-png-grayscale
+  "tool/goo-png-grayscale.c"
+)
+
+target_link_libraries(goo-png-grayscale
+  goo
+  ${LIBPNG_LIBRARIES}
+  ${ARGPARSE_LIBRARIES}
+)
+
+add_executable(goo-png-color
+  "tool/goo-png-color.c"
+)
+
+target_link_libraries(goo-png-color
+  goo
+  ${LIBPNG_LIBRARIES}
+  # ${OPENSSL_LIBRARIES}
+  ${ARGPARSE_LIBRARIES}
+)
+
+add_executable(goo-png-crop
+  "tool/goo-png-crop.c"
+)
+
+target_link_libraries(goo-png-crop
+  goo
+  ${LIBPNG_LIBRARIES}
+  ${ARGPARSE_LIBRARIES}
+)
+
 add_executable(goo-mail-send
   "tool/goo-mail-send.c"
 )

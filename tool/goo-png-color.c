@@ -12,159 +12,64 @@
 ** ─██░░░░░░░░░░██─██░░░░░░░░░░██─██░░░░░░░░░░██─██░░░░░░░░░░██─██░░░░░░██─██░░░░░░░░░░░░██─
 ** ─██████████████─██████████████─██████████████─██████████████─██████████─████████████████─
 */
-#include <stdio.h>
-#include <dirent.h>
-#include <errno.h>
-#include <string.h>
 
+#include <stdio.h>
+#include <stdlib.h>
 #include <argparse.h>
-#include <cJSON.h>
-#include <cJSON_Utils.h>
+
 #include <gfc.h>
 
-#include "goolib-error.h"
-#include "goolib-proc.h"
 #include "goolib-png.h"
+#include "goolib-error.h"
+#include "goolib-util.h"
 
-#define PDFTOIMG "/Users/christian/export/local/works/doublegsoft.open/goolib/03.Development/goolib/3rd/xpdf-4.05/build/darwin/xpdf/pdftopng"
-
-typedef struct rect_s
-{
-  int x0;
-  int y0;
-  int x1;
-  int y1;
-  int w;
-  int h;
-} 
-rect_t;
 
 static const char *const usages[] = 
 {
-  "goo-pdf-crop [options]",
+  "goo-png-color [options]",
   NULL,
 };
 
-static void
-goo_pdf_dir(const char* path)
+int main(int argc, char* argv[]) 
 {
-  DIR* dir = opendir(path);
-  if (!dir) {
-    fprintf(stderr, "opendir(%s) failed: %s\n", path, strerror(errno));
-    return;
-  }
-
-  struct dirent* entry;
-  while ((entry = readdir(dir)) != NULL) 
-  {
-    if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
-      continue;
-    if (strstr(entry->d_name, "_ENG") != NULL)
-      continue;
-    char cmd[8192] = {'\0'};
-    char id[13] = {'\0'};
-    memcpy(id, entry->d_name, 12);
-    id[12] = '\0';
-    sprintf(cmd, PDFTOIMG " %s/%s %s/../pdf_img/%s", 
-      path, entry->d_name, path, id);
-    char* out = NULL;
-    char* err = NULL;
-    int rc = goo_proc_exec(cmd, &out, &err);
-    if (err != NULL)
-    {
-      free(err);
-    }
-    if (out != NULL)
-    {
-      free(out);
-    }
-  }
-  closedir(dir);
-
-  char pdf_img_dir[8192];
-  sprintf(pdf_img_dir, "%s/../pdf_img", path);
-  dir = opendir(pdf_img_dir);
-
-  while ((entry = readdir(dir)) != NULL) 
-  {
-    if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
-      continue;
-    char full_path[8192] = {'\0'};
-    strcpy(full_path, pdf_img_dir);
-    strcat(full_path, "/");
-    strcat(full_path, entry->d_name);
-
-    char id[13] = {'\0'};
-    memcpy(id, entry->d_name, 12);
-    id[12] = '\0';
-
-    char* error = NULL;
-    int index = entry->d_name[18] - '0';
-    char out_path[8192] = {'\0'};
-    sprintf(out_path, "%s/../pdf_crop/%s_bitems_%d.png", path, id, index);
-    goo_png_crop(full_path, 40, 860, 1120, 420, out_path, &error);
-    if (error != NULL)
-      free(error);
-    sprintf(out_path, "%s/../pdf_crop/%s_primary_%d.png", path, id, index);
-    goo_png_crop(full_path, 828, 318, 400, 550, out_path, &error);
-    if (error != NULL)
-      free(error);
-    sprintf(out_path, "%s/../pdf_crop/%s_consumption_%d.png", path, id, index);
-    goo_png_crop(full_path, 75, 330, 700, 455, out_path, &error);
-    if (error != NULL)
-      free(error);
-    sprintf(out_path, "%s/../pdf_crop/%s_footer_%d.png", path, id, index);
-    goo_png_crop(full_path, 70, 1334, 1150, 350, out_path, &error);
-    if (error != NULL)
-      free(error);
-  }
-  closedir(dir);
-}
-
-int main(int argc, char *argv[]) 
-{
-  gfc_gc_init();
-
-  char* coords = NULL;
-  char* pdf = NULL;
-  char* dir = NULL;
-  char* error = NULL;
+  char* img = NULL;
+  char* out = NULL;
+  char* src_clr = NULL;
+  char* dst_clr = NULL;
 
   struct argparse_option options[] = {
     OPT_HELP(),
-    OPT_STRING('d', "dir", &dir, "pdf directory", NULL, 0, 0),
-    OPT_STRING('p', "pdf", &pdf, "pdf file path", NULL, 0, 0),
-    OPT_STRING('c', "coords", &coords, "coordination expression, xyxy format", NULL, 0, 0),
-    OPT_STRING('o', "output", &coords, "output image", NULL, 0, 0),
+    OPT_STRING('i', "image", &img, "the original image", NULL, 0, 0),
+    OPT_STRING('o', "output", &out, "the output image", NULL, 0, 0),
+    OPT_STRING('s', "source", &src_clr, "the source color", NULL, 0, 0),
+    OPT_STRING('d', "destin", &dst_clr, "the destin color", NULL, 0, 0),
     OPT_END(),
   };
-
   struct argparse argparse;
   argparse_init(&argparse, options, usages, 0);
-  argparse_describe(&argparse, "\nCrop pdf to image.", NULL);
+  argparse_describe(&argparse, "\nReplace a color in a png image.", NULL);
   
   argc = argparse_parse(&argparse, argc, (const char**) argv);
-  if (coords == NULL || 
-      (pdf == NULL && dir == NULL)) 
+  if (img == NULL || out == NULL || src_clr == NULL || dst_clr == NULL) 
   {
     argparse_usage(&argparse);
     return GOO_ERROR_FAILURE;
   }
 
-  cJSON* json = cJSON_Parse(coords);
-  if (json == NULL)
+  int width, height, src_r, src_g, src_b, dst_r, dst_g, dst_b;
+  unsigned char* rgba = goo_png_read(img, &width, &height);
+  if (rgba == NULL) 
   {
-    fprintf(stderr, "Invalid JSON\n");
+    fprintf(stderr, "Failed to read PNG file: %s\n", img);
     return GOO_ERROR_FAILURE;
   }
+  goo_color_hex2rgb(src_clr, &src_r, &src_g, &src_b);
+  goo_color_hex2rgb(dst_clr, &dst_r, &dst_g, &dst_b);
+  goo_png_color(rgba, width, height, src_r, src_g, src_b, dst_r, dst_g, dst_b);
 
-  if (dir != NULL)
-  {
-    goo_pdf_dir(dir);
-    return GOO_SUCCESS;
-  }
+  goo_png_write(out, rgba, width, height);
 
-  gfc_list_p rects = gfc_list_new();
-  gfc_list_free(rects);
+  free(rgba);
+
   return GOO_SUCCESS; 
 }
