@@ -12,7 +12,7 @@
 ## ─██████████████─██████████████─██████████████─██████████████─██████████─████████████████─
 cmake_minimum_required(VERSION 3.13)
 
-project(goolib C)
+project(goolib LANGUAGES C CXX)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -91,7 +91,8 @@ set(POLLOPER_LIBRARIES          poppler)
 ##                                                                            ##
 ################################################################################
 set(XPDF_DIR                "3rd/xpdf-4.05")
-set(XPDF_INCLUDE_DIR        "${XPDF_DIR}/xpdf"
+set(XPDF_INCLUDE_DIR        "${XPDF_DIR}"    
+                            "${XPDF_DIR}/xpdf"
                             "${XPDF_DIR}/goo"
                             "${XPDF_DIR}/fofi"
                             "${XPDF_DIR}/splash"
@@ -100,7 +101,38 @@ set(XPDF_LIBRARY_DIR        "${XPDF_DIR}/${BUILD}/xpdf"
                             "${XPDF_DIR}/${BUILD}/splash"
                             "${XPDF_DIR}/${BUILD}/fofi"
                             "${XPDF_DIR}/${BUILD}/goo")
-set(XPDF_LIBRARIES          xpdf fofi splash goo1)
+set(XPDF_LIBRARIES          xpdf splash fofi goo1)
+
+################################################################################
+##                                                                            ##
+##                                 tesseract                                  ##
+##                                                                            ##
+################################################################################
+set(TESSERACT_DIR               "/Users/christian/export/local/opens/tesseract")
+set(TESSERACT_INCLUDE_DIR       "${TESSERACT_DIR}/include"
+                                "${TESSERACT_DIR}/build/darwin/include")
+set(TESSERACT_LIBRARY_DIR       "${TESSERACT_DIR}/build/darwin")
+set(TESSERACT_LIBRARIES         tesseract)
+
+################################################################################
+##                                                                            ##
+##                                 leptonica                                  ##
+##                                                                            ##
+################################################################################
+set(LEPTONICA_DIR               "/opt/homebrew/Cellar/leptonica/1.86.0")
+set(LEPTONICA_INCLUDE_DIR       "${LEPTONICA_DIR}/include")
+set(LEPTONICA_LIBRARY_DIR       "${LEPTONICA_DIR}/lib")
+set(LEPTONICA_LIBRARIES         leptonica)
+
+################################################################################
+##                                                                            ##
+##                                  freetype                                  ##
+##                                                                            ##
+################################################################################
+set(FREETYPE_DIR                "/opt/homebrew/Cellar/freetype/2.14.1_1")
+set(FREETYPE_INCLUDE_DIR        "${FREETYPE_DIR}/include/freetype2")
+set(FREETYPE_LIBRARY_DIR        "${FREETYPE_DIR}/lib")
+set(FREETYPE_LIBRARIES          freetype)
 
 ################################################################################
 ##                                                                            ##
@@ -167,7 +199,14 @@ set(GOOLIB_SOURCES
   "src/goolib-jvm.c"
   "src/goolib-proc.c"
   "src/goolib-png.c"
+  "src/goolib-pdf.c"
   "src/internal/smtp.c"
+)
+
+set_source_files_properties(
+  "src/goolib-pdf.c"
+  PROPERTIES
+    LANGUAGE CXX
 )
 
 include_directories(
@@ -180,6 +219,8 @@ include_directories(
   ${CJSON_INCLUDE_DIR}
   ${GFC_INCLUDE_DIR}
   ${XPDF_INCLUDE_DIR}
+  ${TESSERACT_INCLUDE_DIR}
+  ${LEPTONICA_INCLUDE_DIR}
   ${LIBPNG_INCLUDE_DIR}
 )
 
@@ -192,8 +233,11 @@ link_directories(
   ${JVM_LIBRARY_DIR}
   ${CJSON_LIBRARY_DIR}
   ${XPDF_LIBRARY_DIR}
+  ${TESSERACT_LIBRARY_DIR}
+  ${LEPTONICA_LIBRARY_DIR}
   ${LIBPNG_LIBRARY_DIR}
   ${GFC_LIBRARY_DIR}
+  ${FREETYPE_LIBRARY_DIR}
   ${OTHER_LIBRARY_DIR}
 )
 
@@ -207,11 +251,15 @@ target_link_libraries(goo_shared
   ${MINIZIP_LIBRARIES}
   ${CURL_LIBRARIES}
   ${XPDF_LIBRARIES}
+  ${TESSERACT_LIBRARIES}
+  ${LEPTONICA_LIBRARIES}
   ${CJSON_LIBRARIES}
   ${LIBPNG_LIBRARIES}
   ${JVM_LIBRARIES}
   ${GFC_LIBRARIES}
   ${OTHER_LIBRARIES}
+  ${FREETYPE_LIBRARIES}
+  archive
 )
 
 ################################################################################
@@ -380,5 +428,25 @@ target_link_libraries(goo-pdf-crop
   ${LIBPNG_LIBRARIES}
   ${GFC_LIBRARIES} 
   ${CJSON_LIBRARIES}
+)
+
+add_executable(goo-pdf-text
+  "tool/goo-pdf-text.c"
+)
+
+target_link_libraries(goo-pdf-text
+  goo
+  ${ARGPARSE_LIBRARIES}
+  ${XPDF_LIBRARIES}
+  ${TESSERACT_LIBRARIES}
+  ${LEPTONICA_LIBRARIES}
+  ${CJSON_LIBRARIES}
+  ${LIBPNG_LIBRARIES}
+  ${JVM_LIBRARIES}
+  ${GFC_LIBRARIES}
+  ${CURL_LIBRARIES}
+  ${OTHER_LIBRARIES}
+  ${FREETYPE_LIBRARIES}
+  archive
 )
 

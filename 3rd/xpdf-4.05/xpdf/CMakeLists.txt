@@ -331,7 +331,13 @@ add_library(xpdf STATIC
   TextString.cc
   UnicodeMap.cc
   UnicodeTypeTable.cc
+  UnicodeRemapping.cc
   UTF8.cc
   XRef.cc
   Zoox.cc
+  XFAScanner.cc
+  SplashOutputDev.cc
+  BuiltinFontTables.cc
+  PDF417Barcode.cc
+  ShadingImage.cc
 )
