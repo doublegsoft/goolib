@@ -13,8 +13,8 @@
 ** ─██████████████─██████████████─██████████████─██████████████─██████████─████████████████─
 */
 
-#ifndef GOOLIB_UTIL_H
-#define GOOLIB_UTIL_H
+#ifndef __GOOLIB_UTIL_H__
+#define __GOOLIB_UTIL_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,4 +43,4 @@ goo_util_b64_to_file(const char* b64,
 }
 #endif
 
-#endif /* GOOLIB_UTIL_H */
+#endif /* __GOOLIB_UTIL_H__ */

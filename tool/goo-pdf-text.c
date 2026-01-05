@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
 
   struct argparse_option options[] = {
     OPT_HELP(),
-    OPT_STRING('p', "png", &pdf_path, "pdf path", NULL, 0, 0),
+    OPT_STRING('p', "pdf", &pdf_path, "pdf path", NULL, 0, 0),
     OPT_INTEGER('n', "page number", &page_number, "page number", NULL, 0, 0),
     OPT_STRING('r', "rect", &rect, "rect coordinates, xyxy format", NULL, 0, 0),
     OPT_END(),
@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
     return GOO_ERROR_FAILURE;
   }
 
-  printf("%s\n", text);
+  printf("%s", text);
 
   return GOO_SUCCESS; 
 }

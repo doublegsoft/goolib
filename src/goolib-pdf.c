@@ -104,6 +104,7 @@ goo_pdf_text(const char* pdf_path,
 {
   if (!globalParams) {
     globalParams = new GlobalParams(NULL);
+    globalParams->setErrQuiet(gTrue);
   }
   tesseract::TessBaseAPI* api = new tesseract::TessBaseAPI();
   const char* tessdata = "/Users/christian/export/local/models/tessdata"; 

@@ -15,174 +15,186 @@ cmake_minimum_required(VERSION 3.13)
 project(goolib LANGUAGES C CXX)
 
 set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
-set(PLATFORM                    "darwin")
-set(BUILD                       "build/${PLATFORM}")
+set(PLATFORM                          "darwin")
+set(BUILD                             "build/${PLATFORM}")
 
 ################################################################################
 ##                                                                            ##
 ##                                   argparse                                 ##
 ##                                                                            ##
 ################################################################################
-set(ARGPARSE_DIR                "3rd/argparse-1.1.0")
-set(ARGPARSE_INCLUDE_DIR        "${ARGPARSE_DIR}")
-set(ARGPARSE_LIBRARY_DIR        "${ARGPARSE_DIR}/${BUILD}")
-set(ARGPARSE_LIBRARIES          argparse)
+set(ARGPARSE_DIR                      "3rd/argparse-1.1.0")
+set(ARGPARSE_INCLUDE_DIR              "${ARGPARSE_DIR}")
+set(ARGPARSE_LIBRARY_DIR              "${ARGPARSE_DIR}/${BUILD}")
+set(ARGPARSE_LIBRARIES                argparse)
 
 ################################################################################
 ##                                                                            ##
 ##                                   minizip                                  ##
 ##                                                                            ##
 ################################################################################
-set(MINIZIP_DIR                 "3rd/minizip-ng-4.0.10")
-set(MINIZIP_INCLUDE_DIR         "${MINIZIP_DIR}")
-set(MINIZIP_LIBRARY_DIR         "${MINIZIP_DIR}/${BUILD}")
-set(MINIZIP_LIBRARIES           minizip)
+set(MINIZIP_DIR                       "3rd/minizip-ng-4.0.10")
+set(MINIZIP_INCLUDE_DIR               "${MINIZIP_DIR}")
+set(MINIZIP_LIBRARY_DIR               "${MINIZIP_DIR}/${BUILD}")
+set(MINIZIP_LIBRARIES                 minizip)
 
 ################################################################################
 ##                                                                            ##
 ##                                    curl                                    ##
 ##                                                                            ##
 ################################################################################
-set(CURL_DIR                    "3rd/curl-8.16.0")
-set(CURL_INCLUDE_DIR            "${CURL_DIR}/include")
-set(CURL_LIBRARY_DIR            "${CURL_DIR}/${BUILD}/lib")
-set(CURL_LIBRARIES              curl)
+set(CURL_DIR                          "3rd/curl-8.16.0")
+set(CURL_INCLUDE_DIR                  "${CURL_DIR}/include")
+set(CURL_LIBRARY_DIR                  "${CURL_DIR}/${BUILD}/lib")
+set(CURL_LIBRARIES                    curl)
 
 ################################################################################
 ##                                                                            ##
 ##                                   libssh2                                  ##
 ##                                                                            ##
 ################################################################################
-set(LIBSSH2_DIR                 "3rd/libssh2-1.11.1")
-set(LIBSSH2_INCLUDE_DIR         "${LIBSSH2_DIR}/include")
-set(LIBSSH2_LIBRARY_DIR         "${LIBSSH2_DIR}/${BUILD}/src/.libs")
-set(LIBSSH2_LIBRARIES           ssh2)
+set(LIBSSH2_DIR                       "3rd/libssh2-1.11.1")
+set(LIBSSH2_INCLUDE_DIR               "${LIBSSH2_DIR}/include")
+set(LIBSSH2_LIBRARY_DIR               "${LIBSSH2_DIR}/${BUILD}/src/.libs")
+set(LIBSSH2_LIBRARIES                 ssh2)
 
 ################################################################################
 ##                                                                            ##
 ##                                   openssl                                  ##
 ##                                                                            ##
 ################################################################################
-set(OPENSSL_DIR                 "3rd/openssl-3.6.0")
-set(OPENSSL_INCLUDE_DIR         "${OPENSSL_DIR}/include"
-                                "${OPENSSL_DIR}/${BUILD}/include")
-set(OPENSSL_LIBRARY_DIR         "${OPENSSL_DIR}/${BUILD}")
-set(OPENSSL_LIBRARIES           crypto ssl)
+set(OPENSSL_DIR                       "3rd/openssl-3.6.0")
+set(OPENSSL_INCLUDE_DIR               "${OPENSSL_DIR}/include"
+                                      "${OPENSSL_DIR}/${BUILD}/include")
+set(OPENSSL_LIBRARY_DIR               "${OPENSSL_DIR}/${BUILD}")
+set(OPENSSL_LIBRARIES                 crypto ssl)
 
 ################################################################################
 ##                                                                            ##
 ##                                   poppler                                  ##
 ##                                                                            ##
 ################################################################################
-set(POLLOPER_DIR                "3rd/poppler-25.10.0")
-set(POLLOPER_INCLUDE_DIR        "${POLLOPER_DIR}"
-                                "${POLLOPER_DIR}/poppler"
-                                "${POLLOPER_DIR}/${BUILD}"
-                                "${POLLOPER_DIR}/${BUILD}/poppler")
-set(POLLOPER_LIBRARY_DIR        "${POLLOPER_DIR}/${BUILD}")
-set(POLLOPER_LIBRARIES          poppler)
+set(POLLOPER_DIR                      "3rd/poppler-25.10.0")
+set(POLLOPER_INCLUDE_DIR              "${POLLOPER_DIR}"
+                                      "${POLLOPER_DIR}/poppler"
+                                      "${POLLOPER_DIR}/${BUILD}"
+                                      "${POLLOPER_DIR}/${BUILD}/poppler")
+set(POLLOPER_LIBRARY_DIR              "${POLLOPER_DIR}/${BUILD}")
+set(POLLOPER_LIBRARIES                poppler)
 
 ################################################################################
 ##                                                                            ##
 ##                                    xpdf                                    ##
 ##                                                                            ##
 ################################################################################
-set(XPDF_DIR                "3rd/xpdf-4.05")
-set(XPDF_INCLUDE_DIR        "${XPDF_DIR}"    
-                            "${XPDF_DIR}/xpdf"
-                            "${XPDF_DIR}/goo"
-                            "${XPDF_DIR}/fofi"
-                            "${XPDF_DIR}/splash"
-                            "${XPDF_DIR}/${BUILD}")
-set(XPDF_LIBRARY_DIR        "${XPDF_DIR}/${BUILD}/xpdf"
-                            "${XPDF_DIR}/${BUILD}/splash"
-                            "${XPDF_DIR}/${BUILD}/fofi"
-                            "${XPDF_DIR}/${BUILD}/goo")
-set(XPDF_LIBRARIES          xpdf splash fofi goo1)
+set(XPDF_DIR                          "3rd/xpdf-4.05")
+set(XPDF_INCLUDE_DIR                  "${XPDF_DIR}"    
+                                      "${XPDF_DIR}/xpdf"
+                                      "${XPDF_DIR}/goo"
+                                      "${XPDF_DIR}/fofi"
+                                      "${XPDF_DIR}/splash"
+                                      "${XPDF_DIR}/${BUILD}")
+set(XPDF_LIBRARY_DIR                  "${XPDF_DIR}/${BUILD}/xpdf"
+                                      "${XPDF_DIR}/${BUILD}/splash"
+                                      "${XPDF_DIR}/${BUILD}/fofi"
+                                      "${XPDF_DIR}/${BUILD}/goo")
+set(XPDF_LIBRARIES                    xpdf splash fofi goo1)
 
 ################################################################################
 ##                                                                            ##
 ##                                 tesseract                                  ##
 ##                                                                            ##
 ################################################################################
-set(TESSERACT_DIR               "/Users/christian/export/local/opens/tesseract")
-set(TESSERACT_INCLUDE_DIR       "${TESSERACT_DIR}/include"
-                                "${TESSERACT_DIR}/build/darwin/include")
-set(TESSERACT_LIBRARY_DIR       "${TESSERACT_DIR}/build/darwin")
-set(TESSERACT_LIBRARIES         tesseract)
+set(TESSERACT_DIR                     "/Users/christian/export/local/opens/tesseract")
+set(TESSERACT_INCLUDE_DIR             "${TESSERACT_DIR}/include"
+                                      "${TESSERACT_DIR}/build/darwin/include")
+set(TESSERACT_LIBRARY_DIR             "${TESSERACT_DIR}/build/darwin")
+set(TESSERACT_LIBRARIES               tesseract)
 
 ################################################################################
 ##                                                                            ##
 ##                                 leptonica                                  ##
 ##                                                                            ##
 ################################################################################
-set(LEPTONICA_DIR               "/opt/homebrew/Cellar/leptonica/1.86.0")
-set(LEPTONICA_INCLUDE_DIR       "${LEPTONICA_DIR}/include")
-set(LEPTONICA_LIBRARY_DIR       "${LEPTONICA_DIR}/lib")
-set(LEPTONICA_LIBRARIES         leptonica)
+set(LEPTONICA_DIR                     "/opt/homebrew/Cellar/leptonica/1.86.0")
+set(LEPTONICA_INCLUDE_DIR             "${LEPTONICA_DIR}/include")
+set(LEPTONICA_LIBRARY_DIR             "${LEPTONICA_DIR}/lib")
+set(LEPTONICA_LIBRARIES               leptonica)
 
 ################################################################################
 ##                                                                            ##
 ##                                  freetype                                  ##
 ##                                                                            ##
 ################################################################################
-set(FREETYPE_DIR                "/opt/homebrew/Cellar/freetype/2.14.1_1")
-set(FREETYPE_INCLUDE_DIR        "${FREETYPE_DIR}/include/freetype2")
-set(FREETYPE_LIBRARY_DIR        "${FREETYPE_DIR}/lib")
-set(FREETYPE_LIBRARIES          freetype)
+set(FREETYPE_DIR                      "/opt/homebrew/Cellar/freetype/2.14.1_1")
+set(FREETYPE_INCLUDE_DIR              "${FREETYPE_DIR}/include/freetype2")
+set(FREETYPE_LIBRARY_DIR              "${FREETYPE_DIR}/lib")
+set(FREETYPE_LIBRARIES                freetype)
+
+################################################################################
+##                                                                            ##
+##                                  openxlsx                                  ##
+##                                                                            ##
+################################################################################
+set(OPENXLSX_DIR                      "3rd/OpenXLSX")
+set(OPENXLSX_INCLUDE_DIR              "${OPENXLSX_DIR}/OpenXLSX"
+                                      "${OPENXLSX_DIR}/${BUILD}/OpenXLSX")
+set(OPENXLSX_LIBRARY_DIR              "${OPENXLSX_DIR}/${BUILD}/output")
+set(OPENXLSX_LIBRARIES                OpenXLSX)
 
 ################################################################################
 ##                                                                            ##
 ##                                   libpng                                   ##
 ##                                                                            ##
 ################################################################################
-set(LIBPNG_DIR              "3rd/libpng-1.6.50")
-set(LIBPNG_INCLUDE_DIR      "${LIBPNG_DIR}"
-                            "${LIBPNG_DIR}/${BUILD}")
-set(LIBPNG_LIBRARY_DIR      "${LIBPNG_DIR}/${BUILD}")
-set(LIBPNG_LIBRARIES        png)
+set(LIBPNG_DIR                        "3rd/libpng-1.6.50")
+set(LIBPNG_INCLUDE_DIR                "${LIBPNG_DIR}"
+                                      "${LIBPNG_DIR}/${BUILD}")
+set(LIBPNG_LIBRARY_DIR                "${LIBPNG_DIR}/${BUILD}")
+set(LIBPNG_LIBRARIES                  png)
 
 ################################################################################
 ##                                                                            ##
 ##                                    cjson                                   ##
 ##                                                                            ##
 ################################################################################
-set(CJSON_DIR                   "3rd/cJSON-1.7.19")
-set(CJSON_INCLUDE_DIR           "${CJSON_DIR}")
-set(CJSON_LIBRARY_DIR           "${CJSON_DIR}/${BUILD}")
-set(CJSON_LIBRARIES             cjson)
+set(CJSON_DIR                         "3rd/cJSON-1.7.19")
+set(CJSON_INCLUDE_DIR                 "${CJSON_DIR}")
+set(CJSON_LIBRARY_DIR                 "${CJSON_DIR}/${BUILD}")
+set(CJSON_LIBRARIES                   cjson)
 
 ################################################################################
 ##                                                                            ##
 ##                                   jvm                                      ##
 ##                                                                            ##
 ################################################################################
-set(JVM_DIR                 "/Users/christian/export/opt/jdk-21.0.8/Contents/Home")
-set(JVM_INCLUDE_DIR         "${JVM_DIR}/include"
-                            "${JVM_DIR}/include/${PLATFORM}")
-set(JVM_LIBRARY_DIR         "${JVM_DIR}/lib/server")
-set(JVM_LIBRARIES           jvm)
+set(JVM_DIR                           "/Users/christian/export/opt/jdk-21.0.8/Contents/Home")
+set(JVM_INCLUDE_DIR                   "${JVM_DIR}/include"
+                                      "${JVM_DIR}/include/${PLATFORM}")
+set(JVM_LIBRARY_DIR                   "${JVM_DIR}/lib/server")
+set(JVM_LIBRARIES                     jvm)
 
 ################################################################################
 ##                                                                            ##
 ##                                   gfc                                      ##
 ##                                                                            ##
 ################################################################################
-set(GFC_DIR                 "3rd/gfc-0.1.2")
-set(GFC_INCLUDE_DIR         "${GFC_DIR}/include")
-set(GFC_LIBRARY_DIR         "${GFC_DIR}/${BUILD}")
-set(GFC_LIBRARIES           gfc)
+set(GFC_DIR                           "3rd/gfc-0.1.2")
+set(GFC_INCLUDE_DIR                   "${GFC_DIR}/include")
+set(GFC_LIBRARY_DIR                   "${GFC_DIR}/${BUILD}")
+set(GFC_LIBRARIES                     gfc)
 
 ################################################################################
 ##                                                                            ##
 ##                                    others                                  ##
 ##                                                                            ##
 ################################################################################
-set(OTHER_LIBRARY_DIR       "/opt/homebrew/Cellar/fontconfig/2.17.1/lib")
-set(OTHER_LIBRARIES         z fontconfig)
+set(OTHER_LIBRARY_DIR                 "/opt/homebrew/Cellar/fontconfig/2.17.1/lib")
+set(OTHER_LIBRARIES                   z fontconfig archive)
 
 ################################################################################
 ##                                                                            ##
@@ -200,11 +212,13 @@ set(GOOLIB_SOURCES
   "src/goolib-proc.c"
   "src/goolib-png.c"
   "src/goolib-pdf.c"
+  "src/goolib-xlsx.c"
   "src/internal/smtp.c"
 )
 
 set_source_files_properties(
   "src/goolib-pdf.c"
+  "src/goolib-xlsx.c"
   PROPERTIES
     LANGUAGE CXX
 )
@@ -222,6 +236,7 @@ include_directories(
   ${TESSERACT_INCLUDE_DIR}
   ${LEPTONICA_INCLUDE_DIR}
   ${LIBPNG_INCLUDE_DIR}
+  ${OPENXLSX_INCLUDE_DIR}
 )
 
 link_directories(
@@ -238,6 +253,7 @@ link_directories(
   ${LIBPNG_LIBRARY_DIR}
   ${GFC_LIBRARY_DIR}
   ${FREETYPE_LIBRARY_DIR}
+  ${OPENXLSX_LIBRARY_DIR}
   ${OTHER_LIBRARY_DIR}
 )
 
@@ -257,9 +273,9 @@ target_link_libraries(goo_shared
   ${LIBPNG_LIBRARIES}
   ${JVM_LIBRARIES}
   ${GFC_LIBRARIES}
-  ${OTHER_LIBRARIES}
   ${FREETYPE_LIBRARIES}
-  archive
+  ${OPENXLSX_LIBRARIES}
+  ${OTHER_LIBRARIES}
 )
 
 ################################################################################
@@ -445,8 +461,41 @@ target_link_libraries(goo-pdf-text
   ${JVM_LIBRARIES}
   ${GFC_LIBRARIES}
   ${CURL_LIBRARIES}
-  ${OTHER_LIBRARIES}
   ${FREETYPE_LIBRARIES}
-  archive
+  ${OTHER_LIBRARIES}
+)
+
+set_source_files_properties(
+  "tool/goo-xlsx-write.c"
+  PROPERTIES
+    LANGUAGE CXX
+)
+
+add_executable(goo-xlsx-write
+  "tool/goo-xlsx-write.c"
+)
+
+target_link_libraries(goo-xlsx-write
+  goo
+  ${ARGPARSE_LIBRARIES}
+  ${OPENXLSX_LIBRARIES}
+  ${OTHER_LIBRARIES}
+)
+
+set_source_files_properties(
+  "tool/goo-xlsx-replace.c"
+  PROPERTIES
+    LANGUAGE CXX
+)
+
+add_executable(goo-xlsx-replace
+  "tool/goo-xlsx-replace.c"
+)
+
+target_link_libraries(goo-xlsx-replace
+  goo
+  ${ARGPARSE_LIBRARIES}
+  ${OPENXLSX_LIBRARIES}
+  ${OTHER_LIBRARIES}
 )
 
