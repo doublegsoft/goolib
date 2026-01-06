@@ -56,8 +56,8 @@ int main(int argc, char* argv[])
     return GOO_ERROR_FAILURE;
   }
 
-  int width, height, src_r, src_g, src_b, dst_r, dst_g, dst_b;
-  unsigned char* rgba = goo_png_read(img, &width, &height);
+  int width, height, channels, src_r, src_g, src_b, dst_r, dst_g, dst_b;
+  unsigned char* rgba = goo_png_read(img, &width, &height, &channels);
   if (rgba == NULL) 
   {
     fprintf(stderr, "Failed to read PNG file: %s\n", img);
@@ -65,9 +65,9 @@ int main(int argc, char* argv[])
   }
   goo_color_hex2rgb(src_clr, &src_r, &src_g, &src_b);
   goo_color_hex2rgb(dst_clr, &dst_r, &dst_g, &dst_b);
-  goo_png_color(rgba, width, height, src_r, src_g, src_b, dst_r, dst_g, dst_b);
+  goo_png_color(rgba, width, height, channels, src_r, src_g, src_b, dst_r, dst_g, dst_b);
 
-  goo_png_write(out, rgba, width, height);
+  goo_png_write(out, rgba, width, height, channels);
 
   free(rgba);
 

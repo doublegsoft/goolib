@@ -50,20 +50,20 @@ int main(int argc, char* argv[])
     return GOO_ERROR_FAILURE;
   }
 
-  int width, height;
-  unsigned char* rgba = goo_png_read(img, &width, &height);
+  int width, height, channels;
+  unsigned char* rgba = goo_png_read(img, &width, &height, &channels);
   if (rgba == NULL) {
     fprintf(stderr, "Failed to read PNG file: %s\n", img);
     return GOO_ERROR_FAILURE;
   }
-  unsigned char* gray = goo_png_grayscale(rgba, width, height);
+  unsigned char* gray = goo_png_grayscale(rgba, width, height, channels);
   if (gray == NULL) {
     fprintf(stderr, "Failed to convert PNG to grayscale: %s\n", img);
     free(rgba);
     return GOO_ERROR_FAILURE;
   }
 
-  goo_png_write(out, gray, width, height);
+  goo_png_write(out, gray, width, height, channels);
 
   free(rgba);
   free(gray);

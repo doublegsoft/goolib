@@ -19,8 +19,10 @@
 #include <splash/SplashTypes.h>
 #include <tesseract/baseapi.h>
 #include <leptonica/allheaders.h>
+#include <png.h>
 
 #include "goolib-pdf.h"
+#include "goolib-png.h"
 #include "goolib-error.h"
 
 /*!
@@ -154,12 +156,6 @@ goo_pdf_text(const char* pdf_path,
   );
 
   SplashBitmap* bitmap = splash->getBitmap();
-  
-  // if (bitmap) 
-  // {
-  //   // printf("Saving crop to %s (%dx%d px)\n", out_path, bitmap->getWidth(), bitmap->getHeight());
-  //   // write_splash_to_png(out_path, bitmap);
-  // }
 
   int channels;
   unsigned char* raw_data = goo_bitmap_to_buffer(bitmap, &w, &h, &channels);
@@ -180,4 +176,109 @@ goo_pdf_text(const char* pdf_path,
   delete doc;
 
   return GOO_SUCCESS;
+}
+
+int
+goo_pdf_png(const char* pdf_path, 
+             int page, 
+             int x, 
+             int y, 
+             int w, 
+             int h,
+             unsigned char** png_data,
+             int* chans,
+             char** error)
+{
+  if (!globalParams) {
+    globalParams = new GlobalParams(NULL);
+    globalParams->setErrQuiet(gTrue);
+  }
+
+  GString* fname = new GString(pdf_path);
+  PDFDoc* doc = new PDFDoc(fname); // doc owns fname
+
+  if (!doc->isOk()) {
+    delete doc;
+    return -1;
+  }
+
+  x = x < 0 ? 0 : x;
+  y = y < 0 ? 0 : y;
+
+  Page* p = doc->getCatalog()->getPage(page);
+  
+  if (!p) {
+    delete doc;
+    return GOO_ERROR_FAILURE;
+  } 
+
+  if (w < 0) 
+  {
+    w = p->getCropWidth();
+    w = ((w * 300 / 72.0) + 0.5);
+  }
+  if (h < 0)
+  {
+    h = p->getCropHeight();
+    h = ((h * 300 / 72.0) + 0.5);
+  }
+
+  // Use array to prevent segfaults on some Poppler versions
+  SplashColor paperColor;
+  paperColor[0] = 0xff; 
+  paperColor[1] = 0xff; 
+  paperColor[2] = 0xff;
+
+  SplashOutputDev* splash = new SplashOutputDev(splashModeRGB8, 3, false, paperColor);
+  splash->startDoc(doc->getXRef());
+
+  // displayPageSlice maps the PDF coordinates to the Bitmap pixels
+  doc->displayPageSlice(
+    splash,       // Device
+    page,         // Page Number
+    300, 300,     // Resolution
+    0,            // Rotate
+    false,        // useMediaBox
+    true,         // crop
+    false,        // printing
+    (int)x, (int)y, (int)w, (int)h // The Crop Rect
+  );
+
+  SplashBitmap* bitmap = splash->getBitmap();
+
+  *png_data = goo_bitmap_to_buffer(bitmap, &w, &h, chans);
+
+  delete splash;
+  delete doc;
+
+  return GOO_SUCCESS;
+}
+
+int
+goo_pdf_scan(const char* pdf_path, 
+             int page, 
+             int x, 
+             int y, 
+             int w, 
+             int h,
+             char** text,
+             char** error)
+{
+  if (!globalParams) {
+    globalParams = new GlobalParams(NULL);
+    globalParams->setErrQuiet(gTrue);
+  }
+
+  int ret;
+  int chans = 0;
+  unsigned char* png_data = NULL;
+
+  ret = goo_pdf_png(pdf_path, page, x, y, w, h, &png_data, &chans, error);
+  
+  if (ret != GOO_SUCCESS) 
+  {
+    fprintf(stderr, "%s\n", *error);
+    return ret;
+  }
+  return goo_png_scan(png_data, w, h, chans, text);
 }

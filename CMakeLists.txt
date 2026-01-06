@@ -159,6 +159,17 @@ set(LIBPNG_LIBRARIES                  png)
 
 ################################################################################
 ##                                                                            ##
+##                                   zxing                                    ##
+##                                                                            ##
+################################################################################
+set(ZXING_DIR                         "3rd/zxing-cpp-2.3.0")
+set(ZXING_INCLUDE_DIR                 "${ZXING_DIR}/core/src"
+                                      "${ZXING_DIR}/build/darwin/core")
+set(ZXING_LIBRARY_DIR                 "${ZXING_DIR}/build/darwin/core")
+set(ZXING_LIBRARIES                   ZXing.2.3.0)
+
+################################################################################
+##                                                                            ##
 ##                                    cjson                                   ##
 ##                                                                            ##
 ################################################################################
@@ -219,6 +230,7 @@ set(GOOLIB_SOURCES
 set_source_files_properties(
   "src/goolib-pdf.c"
   "src/goolib-xlsx.c"
+  "src/goolib-png.c"
   PROPERTIES
     LANGUAGE CXX
 )
@@ -236,6 +248,7 @@ include_directories(
   ${TESSERACT_INCLUDE_DIR}
   ${LEPTONICA_INCLUDE_DIR}
   ${LIBPNG_INCLUDE_DIR}
+  ${ZXING_INCLUDE_DIR}
   ${OPENXLSX_INCLUDE_DIR}
 )
 
@@ -254,6 +267,7 @@ link_directories(
   ${GFC_LIBRARY_DIR}
   ${FREETYPE_LIBRARY_DIR}
   ${OPENXLSX_LIBRARY_DIR}
+  ${ZXING_LIBRARY_DIR}
   ${OTHER_LIBRARY_DIR}
 )
 
@@ -275,6 +289,7 @@ target_link_libraries(goo_shared
   ${GFC_LIBRARIES}
   ${FREETYPE_LIBRARIES}
   ${OPENXLSX_LIBRARIES}
+  ${ZXING_LIBRARIES}
   ${OTHER_LIBRARIES}
 )
 
@@ -292,6 +307,7 @@ target_link_libraries(goo-png-grayscale
   goo
   ${LIBPNG_LIBRARIES}
   ${ARGPARSE_LIBRARIES}
+  ${ZXING_LIBRARIES}
 )
 
 add_executable(goo-png-color
@@ -301,8 +317,8 @@ add_executable(goo-png-color
 target_link_libraries(goo-png-color
   goo
   ${LIBPNG_LIBRARIES}
-  # ${OPENSSL_LIBRARIES}
   ${ARGPARSE_LIBRARIES}
+  ${ZXING_LIBRARIES}
 )
 
 add_executable(goo-png-crop
@@ -313,6 +329,7 @@ target_link_libraries(goo-png-crop
   goo
   ${LIBPNG_LIBRARIES}
   ${ARGPARSE_LIBRARIES}
+  ${ZXING_LIBRARIES}
 )
 
 add_executable(goo-mail-send
@@ -444,6 +461,7 @@ target_link_libraries(goo-pdf-crop
   ${LIBPNG_LIBRARIES}
   ${GFC_LIBRARIES} 
   ${CJSON_LIBRARIES}
+  ${ZXING_LIBRARIES}
 )
 
 add_executable(goo-pdf-text
@@ -462,6 +480,47 @@ target_link_libraries(goo-pdf-text
   ${GFC_LIBRARIES}
   ${CURL_LIBRARIES}
   ${FREETYPE_LIBRARIES}
+  ${ZXING_LIBRARIES}
+  ${OTHER_LIBRARIES}
+)
+
+add_executable(goo-pdf-scan
+  "tool/goo-pdf-scan.c"
+)
+
+target_link_libraries(goo-pdf-scan
+  goo
+  ${ARGPARSE_LIBRARIES}
+  ${XPDF_LIBRARIES}
+  ${TESSERACT_LIBRARIES}
+  ${LEPTONICA_LIBRARIES}
+  ${CJSON_LIBRARIES}
+  ${LIBPNG_LIBRARIES}
+  ${JVM_LIBRARIES}
+  ${GFC_LIBRARIES}
+  ${CURL_LIBRARIES}
+  ${FREETYPE_LIBRARIES}
+  ${ZXING_LIBRARIES}
+  ${OTHER_LIBRARIES}
+)
+
+add_executable(goo-pdf-png
+  "tool/goo-pdf-png.c"
+)
+
+target_link_libraries(goo-pdf-png
+  goo
+  ${ARGPARSE_LIBRARIES}
+  ${XPDF_LIBRARIES}
+  ${TESSERACT_LIBRARIES}
+  ${LEPTONICA_LIBRARIES}
+  ${CJSON_LIBRARIES}
+  ${LIBPNG_LIBRARIES}
+  ${JVM_LIBRARIES}
+  ${GFC_LIBRARIES}
+  ${CURL_LIBRARIES}
+  ${FREETYPE_LIBRARIES}
+  ${ZXING_LIBRARIES}
   ${OTHER_LIBRARIES}
 )
 
