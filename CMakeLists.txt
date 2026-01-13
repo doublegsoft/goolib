@@ -223,6 +223,7 @@ set(GOOLIB_SOURCES
   "src/goolib-proc.c"
   "src/goolib-png.c"
   "src/goolib-pdf.c"
+  "src/goolib-ocr.c"
   "src/goolib-xlsx.c"
   "src/internal/smtp.c"
 )
@@ -231,6 +232,7 @@ set_source_files_properties(
   "src/goolib-pdf.c"
   "src/goolib-xlsx.c"
   "src/goolib-png.c"
+  "src/goolib-ocr.c"
   PROPERTIES
     LANGUAGE CXX
 )
@@ -326,6 +328,17 @@ add_executable(goo-png-crop
 )
 
 target_link_libraries(goo-png-crop
+  goo
+  ${LIBPNG_LIBRARIES}
+  ${ARGPARSE_LIBRARIES}
+  ${ZXING_LIBRARIES}
+)
+
+add_executable(goo-png-concat
+  "tool/goo-png-concat.c"
+)
+
+target_link_libraries(goo-png-concat
   goo
   ${LIBPNG_LIBRARIES}
   ${ARGPARSE_LIBRARIES}
@@ -555,6 +568,7 @@ target_link_libraries(goo-xlsx-replace
   goo
   ${ARGPARSE_LIBRARIES}
   ${OPENXLSX_LIBRARIES}
+  ${CJSON_LIBRARIES}
   ${OTHER_LIBRARIES}
 )
 

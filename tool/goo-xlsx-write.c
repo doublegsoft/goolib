@@ -61,6 +61,6 @@ main(int argc, char* argv[])
     return GOO_ERROR_FAILURE;
   }
 
-  goo_xlsx_write(file_path, sheet_name, row, col, data);
+  goo_xlsx_write(file_path, sheet_name, row, col, data, NULL);
   return GOO_SUCCESS; 
 }

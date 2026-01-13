@@ -124,6 +124,30 @@ goo_png_scan(const unsigned char* data,
              int channels, 
              char** text);
 
+/*!
+** Concatenates two raw image buffers horizontally into a standard RGBA buffer.
+**
+** This function handles input images with different channel counts (3 or 4).
+** If an input is RGB (3 channels), it adds an opaque alpha channel (255).
+** If an input is RGBA (4 channels), it preserves the transparency.
+**
+** @param img1     Pointer to raw data of left image
+** @param w1       Width of left image
+** @param h1       Height of left image
+** @param c1       Channels of left image (3 or 4)
+** @param img2     Pointer to raw data of right image
+** @param w2       Width of right image
+** @param h2       Height of right image
+** @param c2       Channels of right image (3 or 4)
+** @param out_w    Output: New width
+** @param out_h    Output: New height
+** @return         Pointer to new RGBA buffer (Caller must free), or NULL on error
+*/
+unsigned char*
+goo_png_concat(const unsigned char* img1, int w1, int h1, int c1,
+               const unsigned char* img2, int w2, int h2, int c2,
+               int* out_w, int* out_h);
+
 #ifdef __cplusplus
 }
 #endif

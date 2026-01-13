@@ -29,7 +29,8 @@ goo_xlsx_write(const char* file_path,
                const char* sheet_name,
                int row, 
                int col,
-               char* data)
+               char* data,
+               goo_xlsx_style_t* style)
 {
   XLDocument doc;
   try {
@@ -72,7 +73,8 @@ goo_xlsx_replace(const char* file_path,
                  const char* key,
                  int key_index, 
                  int col,
-                 char* data)
+                 char* data,
+                 goo_xlsx_style_t* style)
 {
   int row_idx = 1;
   XLDocument doc;
@@ -100,7 +102,23 @@ goo_xlsx_replace(const char* file_path,
       break;
     }
   }
-  wks.cell(row_idx, col).value() = data;
+
+  auto cell = wks.cell(row_idx, col);
+
+  if (style != NULL) 
+  {
+    XLCellFormats& cellFormats = doc.styles().cellFormats();
+    XLStyleIndex cellFormat = cellFormats.create();
+    XLFonts& fonts = doc.styles().fonts();
+    if (strlen(style->fgcolor) != 0) {
+      XLStyleIndex font = fonts.create();
+	    fonts[font].setFontColor(XLColor(style->fgcolor));
+      cellFormats[cellFormat].setFontIndex(font);
+      cell.setCellFormat(cellFormat);
+    }
+  } 
+
+  cell.value() = data;
   doc.save();
   doc.close();
   return GOO_SUCCESS;

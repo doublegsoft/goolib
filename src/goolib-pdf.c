@@ -12,18 +12,23 @@
 ** ─██░░░░░░░░░░██─██░░░░░░░░░░██─██░░░░░░░░░░██─██░░░░░░░░░░██─██░░░░░░██─██░░░░░░░░░░░░██─
 ** ─██████████████─██████████████─██████████████─██████████████─██████████─████████████████─
 */
+#include <filesystem>
 #include <GlobalParams.h>
 #include <PDFDoc.h>
 #include <SplashOutputDev.h>
 #include <splash/SplashBitmap.h>
 #include <splash/SplashTypes.h>
+
 #include <tesseract/baseapi.h>
 #include <leptonica/allheaders.h>
 #include <png.h>
 
 #include "goolib-pdf.h"
 #include "goolib-png.h"
+#include "goolib-ocr.h"
 #include "goolib-error.h"
+
+namespace fs = std::filesystem;
 
 /*!
 ** Converts a SplashBitmap to a standard packed pixel buffer.
@@ -108,15 +113,6 @@ goo_pdf_text(const char* pdf_path,
     globalParams = new GlobalParams(NULL);
     globalParams->setErrQuiet(gTrue);
   }
-  tesseract::TessBaseAPI* api = new tesseract::TessBaseAPI();
-  const char* tessdata = "/Users/christian/export/local/models/tessdata"; 
-  if (api->Init(tessdata, "eng")) 
-  {
-    fprintf(stderr, "Could not initialize tesseract.\n");
-    delete api;
-    return GOO_ERROR_FAILURE;
-  }
-  api->SetPageSegMode(tesseract::PSM_SINGLE_LINE);
 
   GString* fname = new GString(pdf_path);
   PDFDoc* doc = new PDFDoc(fname); 
@@ -162,16 +158,12 @@ goo_pdf_text(const char* pdf_path,
 
   if (raw_data) 
   {
-    // Note: channels will be 3 for RGB8, 1 for Mono8
-    // stride is w * channels because we packed it tightly
+    tesseract::TessBaseAPI* api = (tesseract::TessBaseAPI*) goo_ocr_api();
     api->SetImage(raw_data, w, h, channels, w * channels);
-    
     *text = api->GetUTF8Text();
+    api->End();
     free(raw_data);
   }
-
-  api->End();
-  delete api;
   delete splash;
   delete doc;
 
@@ -189,6 +181,13 @@ goo_pdf_png(const char* pdf_path,
              int* chans,
              char** error)
 {
+  try {
+    fs::exists(pdf_path) && fs::is_regular_file(pdf_path);
+  } catch (const fs::filesystem_error& e) {
+    *error = (char*)malloc(4096 * sizeof(char));
+    sprintf(*error, "'%s'不存在或者不是常规文件", pdf_path);
+    return GOO_ERROR_FAILURE;
+  }
   if (!globalParams) {
     globalParams = new GlobalParams(NULL);
     globalParams->setErrQuiet(gTrue);

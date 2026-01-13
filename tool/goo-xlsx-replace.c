@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <argparse.h>
 #include <string.h>
+#include <cJSON.h>
 
 #include "goolib-error.h"
 #include "goolib-xlsx.h"
@@ -33,6 +34,7 @@ main(int argc, char* argv[])
   char* sheet_name = NULL;
   char* data = NULL;
   char* key = NULL;
+  char* style = NULL;
   int idx = 1;
   int col = 1;
 
@@ -44,6 +46,7 @@ main(int argc, char* argv[])
     OPT_INTEGER('i', "index", &idx, "the key column index", NULL, 0, 0),
     OPT_INTEGER('c', "column", &col, "the column index", NULL, 0, 0),
     OPT_STRING('d', "data", &data, "the data", NULL, 0, 0),
+    OPT_STRING('x', "style", &style, "the style", NULL, 0, 0),
     OPT_END(),
   };
   
@@ -63,6 +66,16 @@ main(int argc, char* argv[])
     return GOO_ERROR_FAILURE;
   }
 
-  goo_xlsx_replace(file_path, sheet_name, key, idx, col, data);
+  goo_xlsx_style_t cell_style;
+  if (style != NULL) {
+    cJSON* root = cJSON_Parse(style);
+    cJSON* fgcolor = cJSON_GetObjectItem(root, "fgcolor");
+    strcpy(cell_style.fgcolor, fgcolor->valuestring);
+    goo_xlsx_replace(file_path, sheet_name, key, idx, col, data, &cell_style);
+    cJSON_Delete(root);
+  } else {
+    goo_xlsx_replace(file_path, sheet_name, key, idx, col, data, NULL);
+  }
+  
   return GOO_SUCCESS; 
 }

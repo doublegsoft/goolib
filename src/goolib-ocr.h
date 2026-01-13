@@ -19,6 +19,19 @@
 extern "C" {
 #endif
 
+int
+goo_ocr_init(const char* tessdata, const char* langs);
+
+void*
+goo_ocr_api(void);
+
+int
+goo_ocr_text(const unsigned char* data, 
+             int width, 
+             int height, 
+             int channels, 
+             char** text);
+
 #ifdef __cplusplus
 }
 #endif

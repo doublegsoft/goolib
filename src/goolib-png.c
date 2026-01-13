@@ -30,7 +30,8 @@
 unsigned char*
 goo_png_read(const char* filename, int* width, int* height, int* channels) {
   FILE* fp = fopen(filename, "rb");
-  if (!fp) {
+  if (!fp) 
+  {
     fprintf(stderr, "Error: Could not open %s\n", filename);
     return NULL;
   }
@@ -82,26 +83,23 @@ goo_png_read(const char* filename, int* width, int* height, int* channels) {
   if (color_type == PNG_COLOR_TYPE_GRAY || color_type == PNG_COLOR_TYPE_GRAY_ALPHA)
     png_set_gray_to_rgb(png);
 
-  // Add Alpha channel if missing (RGB -> RGBA)
-  // This ensures our output is always 4 bytes per pixel
-  if (!(color_type & PNG_COLOR_MASK_ALPHA))
-    png_set_add_alpha(png, 0xFF, PNG_FILLER_AFTER);
+  if (color_type & PNG_COLOR_MASK_ALPHA)
+    png_set_strip_alpha(png);
 
   png_read_update_info(png, info);
 
-  // --- READ DATA ---
   *width = png_get_image_width(png, info);
   *height = png_get_image_height(png, info);
   int row_bytes = png_get_rowbytes(png, info);
 
-  // Allocate buffer for RGBA (should be width * height * 4)
-  unsigned char* data = (unsigned char*)malloc(row_bytes * (*height));
+  // allocate buffer for buffer (should be width * height * channels)
+  unsigned char* data = (unsigned char*)malloc((*width) * (*height) * (*channels));
   if (!data) {
     png_destroy_read_struct(&png, &info, NULL);
     fclose(fp);
     return NULL;
   }
-
+  
   png_bytep* row_pointers = (png_bytep*)malloc(sizeof(png_bytep) * (*height));
   for (int y = 0; y < *height; y++) {
     row_pointers[y] = data + (y * row_bytes);
@@ -290,7 +288,7 @@ goo_png_grayscale(unsigned char* rgba_data, int width, int height, int channels)
     
     // Luminance formula (Human perception)
     // Using integer math for speed: (R*30 + G*59 + B*11) / 100
-    int gray = (r * 30 + g * 59 + b * 11) / 100;
+    int gray = (r * 40 + g * 59 + b * 11) / 100;
 
     gray_data[i] = (unsigned char)gray;
   }
@@ -397,4 +395,108 @@ goo_png_scan(const unsigned char* data,
     return GOO_SUCCESS;
   }
   return GOO_ERROR_FAILURE;
+}
+
+unsigned char*
+goo_png_concat(const unsigned char* img1, int w1, int h1, int c1,
+               const unsigned char* img2, int w2, int h2, int c2,
+               int* out_w, int* out_h)
+{
+  if (!img1 || !img2) return NULL;
+
+  *out_w = w1 + w2;
+  *out_h = h1 > h2 ? h1 : h2;
+
+  size_t size = (*out_w) * (*out_h) * 4;
+  unsigned char* result = (unsigned char*)malloc(size);
+  if (!result) return NULL;
+
+  memset(result, 0, size);
+
+  for (int y = 0; y < *out_h; y++)
+  {
+    const unsigned char* src_row = img1 + (y * w1 * c1);
+    unsigned char* dest_row = result + (y * (*out_w) * 4);
+    for (int x = 0; x < w1; x++) {
+      const unsigned char* p_src = src_row + (x * c1);
+      unsigned char* p_dest = dest_row + (x * 4);
+      if (c1 == 4) {
+        p_dest[0] = p_src[0];
+        p_dest[1] = p_src[1];
+        p_dest[2] = p_src[2];
+        p_dest[3] = p_src[3];
+      } else {
+        p_dest[0] = p_src[0];
+        p_dest[1] = p_src[1];
+        p_dest[2] = p_src[2];
+        p_dest[3] = 255;
+      }
+    }
+
+    src_row = img2 + (y * w2 * c2);
+    dest_row = result + (y * (*out_w) * 4) + (w1 * 4);
+
+    for (int x = 0; x < w2; x++) {
+      const unsigned char* p_src = src_row + (x * c2);
+      unsigned char* p_dest = dest_row + (x * 4);
+
+      if (c2 == 4) {
+        p_dest[0] = p_src[0];
+        p_dest[1] = p_src[1];
+        p_dest[2] = p_src[2];
+        p_dest[3] = p_src[3];
+      } else {
+        p_dest[0] = p_src[0];
+        p_dest[1] = p_src[1];
+        p_dest[2] = p_src[2];
+        p_dest[3] = 255;
+      }
+    }
+  }
+
+  // for (int y = 0; y < h1; y++) {
+  //   const unsigned char* src_row = img1 + (y * w1 * c1);
+  //   unsigned char* dest_row = result + (y * (*out_w) * 4);
+
+  //   for (int x = 0; x < w1; x++) {
+  //     const unsigned char* p_src = src_row + (x * c1);
+  //     unsigned char* p_dest = dest_row + (x * 4);
+
+  //     if (c1 == 4) {
+  //       p_dest[0] = p_src[0];
+  //       p_dest[1] = p_src[1];
+  //       p_dest[2] = p_src[2];
+  //       p_dest[3] = p_src[3];
+  //     } else {
+  //       p_dest[0] = p_src[0];
+  //       p_dest[1] = p_src[1];
+  //       p_dest[2] = p_src[2];
+  //       p_dest[3] = 255;
+  //     }
+  //   }
+  // }
+
+  // for (int y = 0; y < h2; y++) {
+    // const unsigned char* src_row = img2 + (y * w2 * c2);
+    // unsigned char* dest_row = result + (y * (*out_w) * 4) + (w1 * 4);
+
+  //   for (int x = 0; x < w2; x++) {
+  //     const unsigned char* p_src = src_row + (x * c2);
+  //     unsigned char* p_dest = dest_row + (x * 4);
+
+  //     if (c2 == 4) {
+  //       p_dest[0] = p_src[0];
+  //       p_dest[1] = p_src[1];
+  //       p_dest[2] = p_src[2];
+  //       p_dest[3] = p_src[3];
+  //     } else {
+  //       p_dest[0] = p_src[0];
+  //       p_dest[1] = p_src[1];
+  //       p_dest[2] = p_src[2];
+  //       p_dest[3] = 255;
+  //     }
+  //   }
+  // }
+
+  return result;
 }

@@ -24,6 +24,7 @@
 
 #include "goolib-error.h"
 #include "goolib-proc.h"
+#include "goolib-ocr.h"
 #include "goolib-pdf.h"
 
 static const char *const usages[] = 
@@ -38,6 +39,9 @@ int main(int argc, char *argv[])
   char* rect = NULL;
   int page_number = 1;
   char* output = NULL;
+
+  // 初始化 tesseract
+  goo_ocr_init("/Users/christian/export/local/models/tessdata", "eng+chi_tra+chi_sim");
 
   struct argparse_option options[] = {
     OPT_HELP(),

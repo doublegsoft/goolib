@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
   
   if (error != NULL)
   { 
-    fprintf(stderr, "Error: %s\n", error);
+    fprintf(stderr, "%s\n", error);
     return GOO_ERROR_FAILURE;
   }
   if (w < 0)
