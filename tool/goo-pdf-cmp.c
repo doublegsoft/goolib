@@ -12,57 +12,74 @@
 ** ─██░░░░░░░░░░██─██░░░░░░░░░░██─██░░░░░░░░░░██─██░░░░░░░░░░██─██░░░░░░██─██░░░░░░░░░░░░██─
 ** ─██████████████─██████████████─██████████████─██████████████─██████████─████████████████─
 */
-#ifndef __GOOLIB_OCR_H__
-#define __GOOLIB_OCR_H__  
+#include <stdio.h>
+#include <dirent.h>
+#include <errno.h>
+#include <string.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <argparse.h>
+#include <cJSON.h>
+#include <cJSON_Utils.h>
+#include <gfc.h>
 
-int
-goo_ocr_init(const char* tessdata, const char* langs);
+#include "goolib-error.h"
+#include "goolib-proc.h"
+#include "goolib-ocr.h"
+#include "goolib-pdf.h"
 
-void*
-goo_ocr_api(void);
+static const char *const usages[] = 
+{
+  "goo-pdf-cmp [options]",
+  NULL,
+};
 
-int
-goo_ocr_text(const unsigned char* data, 
-             int width, 
-             int height, 
-             int channels, 
-             char** text);
+int main(int argc, char *argv[]) 
+{
+  char* p1 = NULL;
+  char* p2 = NULL;
+  char* rect = NULL;
+  int page_number = 1;
+  char* output = NULL;
 
-/*!
-** Compare two images by OCR result.
-**
-** This function performs OCR on two input images using Tesseract,
-** extracts UTF-8 text from each image, and compares the recognized
-** text content using goo_ocr_cmp().
-**
-** @param img1 Pointer to image1 raw pixel buffer
-** @param w1   Width of image1
-** @param h1   Height of image1
-** @param c1   Number of channels of image1 (e.g. 1=gray, 3=RGB)
-** @param img2 Pointer to image2 raw pixel buffer
-** @param w2   Width of image2
-** @param h2   Height of image2
-** @param c2   Number of channels of image2
-**
-** @return GOO_SUCCESS if OCR texts are considered equal,
-**         GOO_ERROR_FAILURE otherwise
-*/
-int
-goo_ocr_eq(const unsigned char* img1, 
-           int w1, 
-           int h1, 
-           int c1, 
-           const unsigned char* img2, 
-           int w2, 
-           int h2, 
-           int c2);
+  // 初始化 tesseract
+  goo_ocr_init("/Users/christian/export/local/models/tessdata", "eng+chi_tra+chi_sim");
 
-#ifdef __cplusplus
+  struct argparse_option options[] = {
+    OPT_HELP(),
+    OPT_STRING('f', "first", &p1, "the first pdf path", NULL, 0, 0),
+    OPT_STRING('s', "second", &p2, "the second pdf path", NULL, 0, 0),
+    OPT_INTEGER('n', "page number", &page_number, "page number", NULL, 0, 0),
+    OPT_STRING('r', "rect", &rect, "rect coordinates, xyxy format", NULL, 0, 0),
+    OPT_END(),
+  };
+
+  struct argparse argparse;
+  argparse_init(&argparse, options, usages, 0);
+  argparse_describe(&argparse, "\nGet text from specific rect in pdf.", NULL);
+  
+  argc = argparse_parse(&argparse, argc, (const char**) argv);
+  if (p1 == NULL || p2 == NULL || rect == NULL)
+  {
+    argparse_usage(&argparse);
+    return GOO_ERROR_FAILURE;
+  }
+
+  double x1, y1, x2, y2;
+  int c;
+  sscanf(rect, "%lf,%lf,%lf,%lf", &x1, &y1, &x2, &y2);
+
+  char* error = NULL;
+  char* text = NULL;
+
+  unsigned char* img1 = NULL;
+  unsigned char* img2 = NULL;
+
+  goo_pdf_png(p1, page_number, (int)x1, (int)y1, (int)(x2 - x1), (int)(y2 - y1), &img1, &c, &error);
+  goo_pdf_png(p2, page_number, (int)x1, (int)y1, (int)(x2 - x1), (int)(y2 - y1), &img2, &c, &error);
+
+  int rc = goo_ocr_eq(img1, (int)(x2 - x1), (int)(y2 - y1), c, img2, (int)(x2 - x1), (int)(y2 - y1), c);
+
+  printf("%d", rc);
+
+  return GOO_SUCCESS; 
 }
-#endif
-
-#endif // __GOOLIB_OCR_H__

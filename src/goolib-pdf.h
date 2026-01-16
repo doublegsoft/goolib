@@ -65,14 +65,14 @@ goo_pdf_text(const char* pdf_path,
 */
 int
 goo_pdf_png(const char* pdf_path, 
-             int page, 
-             int x, 
-             int y, 
-             int w, 
-             int h,
-             unsigned char** png_data,
-             int* chans,
-             char** error);
+            int page, 
+            int x, 
+            int y, 
+            int w, 
+            int h,
+            unsigned char** png_data,
+            int* chans,
+            char** error);
 
 /*!
 ** Extracts a region from a PDF page and scans it (e.g., for barcodes).

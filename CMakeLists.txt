@@ -497,6 +497,26 @@ target_link_libraries(goo-pdf-text
   ${OTHER_LIBRARIES}
 )
 
+add_executable(goo-pdf-cmp
+  "tool/goo-pdf-cmp.c"
+)
+
+target_link_libraries(goo-pdf-cmp
+  goo
+  ${ARGPARSE_LIBRARIES}
+  ${XPDF_LIBRARIES}
+  ${TESSERACT_LIBRARIES}
+  ${LEPTONICA_LIBRARIES}
+  ${CJSON_LIBRARIES}
+  ${LIBPNG_LIBRARIES}
+  ${JVM_LIBRARIES}
+  ${GFC_LIBRARIES}
+  ${CURL_LIBRARIES}
+  ${FREETYPE_LIBRARIES}
+  ${ZXING_LIBRARIES}
+  ${OTHER_LIBRARIES}
+)
+
 add_executable(goo-pdf-scan
   "tool/goo-pdf-scan.c"
 )
