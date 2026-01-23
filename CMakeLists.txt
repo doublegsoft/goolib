@@ -65,7 +65,12 @@ set(CURL_LIBRARIES                    curl)
 ################################################################################
 set(LIBSSH2_DIR                       "3rd/libssh2-1.11.1")
 set(LIBSSH2_INCLUDE_DIR               "${LIBSSH2_DIR}/include")
-set(LIBSSH2_LIBRARY_DIR               "${LIBSSH2_DIR}/${BUILD}/src/.libs")
+if (WIN32)
+elseif (APPLE)
+  set(LIBSSH2_LIBRARY_DIR             "${LIBSSH2_DIR}/${BUILD}/src/.libs")
+elseif (UNIX)
+  set(LIBSSH2_LIBRARY_DIR             "${LIBSSH2_DIR}/${BUILD}/src")
+endif()
 set(LIBSSH2_LIBRARIES                 ssh2)
 
 ################################################################################
@@ -170,9 +175,15 @@ set(LIBPNG_LIBRARIES                  png)
 ################################################################################
 set(ZXING_DIR                         "3rd/zxing-cpp-2.3.0")
 set(ZXING_INCLUDE_DIR                 "${ZXING_DIR}/core/src"
-                                      "${ZXING_DIR}/build/darwin/core")
-set(ZXING_LIBRARY_DIR                 "${ZXING_DIR}/build/darwin/core")
-set(ZXING_LIBRARIES                   ZXing.2.3.0)
+                                      "${ZXING_DIR}/${BUILD}/core")
+set(ZXING_LIBRARY_DIR                 "${ZXING_DIR}/${BUILD}/core")
+if (WIN32)
+elseif (APPLE)
+  set(ZXING_LIBRARIES                 ZXing.2.3.0)
+elseif (UNIX)
+  set(ZXING_LIBRARIES                 ZXing)
+endif()
+
 
 ################################################################################
 ##                                                                            ##
