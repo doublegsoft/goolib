@@ -19,7 +19,13 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
-set(PLATFORM                          "darwin")
+if (WIN32)
+elseif (APPLE)
+  set(PLATFORM                          "darwin")
+elseif (UNIX)
+  set(PLATFORM                          "linux")
+endif()
+
 set(BUILD                             "build/${PLATFORM}")
 
 ################################################################################
@@ -109,10 +115,10 @@ set(XPDF_LIBRARIES                    xpdf splash fofi goo1)
 ##                                 tesseract                                  ##
 ##                                                                            ##
 ################################################################################
-set(TESSERACT_DIR                     "/Users/christian/export/local/opens/tesseract")
+set(TESSERACT_DIR                     "3rd/tesseract-5.5.2")
 set(TESSERACT_INCLUDE_DIR             "${TESSERACT_DIR}/include"
-                                      "${TESSERACT_DIR}/build/darwin/include")
-set(TESSERACT_LIBRARY_DIR             "${TESSERACT_DIR}/build/darwin")
+                                      "${TESSERACT_DIR}/${BUILD}/include")
+set(TESSERACT_LIBRARY_DIR             "${TESSERACT_DIR}/${BUILD}")
 set(TESSERACT_LIBRARIES               tesseract)
 
 ################################################################################
@@ -183,7 +189,12 @@ set(CJSON_LIBRARIES                   cjson)
 ##                                   jvm                                      ##
 ##                                                                            ##
 ################################################################################
-set(JVM_DIR                           "/Users/christian/export/opt/jdk-21.0.8/Contents/Home")
+if (WIN32)
+elseif (APPLE)
+  set(JVM_DIR                         "/Users/christian/export/opt/jdk-21.0.8/Contents/Home")
+elseif (UNIX)
+  set(JVM_DIR                         "/export/opt/jdk-21.0.7")
+endif()
 set(JVM_INCLUDE_DIR                   "${JVM_DIR}/include"
                                       "${JVM_DIR}/include/${PLATFORM}")
 set(JVM_LIBRARY_DIR                   "${JVM_DIR}/lib/server")
@@ -239,6 +250,7 @@ set_source_files_properties(
 
 include_directories(
   "src"
+  ${CURL_INCLUDE_DIR}
   ${OPENSSL_INCLUDE_DIR}
   ${LIBSSH2_INCLUDE_DIR}
   ${ARGPARSE_INCLUDE_DIR}

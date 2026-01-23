@@ -14,6 +14,7 @@
 */
 #include <OpenXLSX.hpp>
 #include <iostream>
+#include <filesystem>
 #include <fstream>
 #include <string>
 
