@@ -18,6 +18,7 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 if (WIN32)
 elseif (APPLE)
@@ -297,10 +298,16 @@ link_directories(
 )
 
 add_library(goo STATIC ${GOOLIB_SOURCES})
-add_library(goo_shared SHARED ${GOOLIB_SOURCES})
-set_target_properties(goo_shared PROPERTIES OUTPUT_NAME goo)
+if (WIN32)
+elseif (APPLE)
+  add_library(goo_shared SHARED ${GOOLIB_SOURCES})
+  set_target_properties(goo_shared PROPERTIES OUTPUT_NAME goo)
+  set(LIBNAME                  "goo_shared")
+elseif (UNIX)
+  set(LIBNAME                  "goo")
+endif()
 
-target_link_libraries(goo_shared
+target_link_libraries(${LIBNAME}
   ${LIBSSH2_LIBRARIES}
   ${OPENSSL_LIBRARIES}
   ${MINIZIP_LIBRARIES}
