@@ -19,10 +19,19 @@
 #include <algorithm>
 #include <tesseract/baseapi.h>
 
+#include <include/paddleocr.h>
+#include <include/paddlestructure.h>
+#include <include/utility.h>
+
+using namespace PaddleOCR;
+
 #include "goolib-ocr.h"
 #include "goolib-error.h"
 
 static tesseract::TessBaseAPI* api = new tesseract::TessBaseAPI();
+
+// init ocr object
+static PPOCR ppocr = PPOCR();
 
 static std::string 
 goo_ocr_strip(const std::string& s) 

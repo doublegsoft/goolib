@@ -112,6 +112,19 @@ set(XPDF_LIBRARIES                    xpdf splash fofi goo1)
 
 ################################################################################
 ##                                                                            ##
+##                                   opencv                                   ##
+##                                                                            ##
+################################################################################
+set(OPENCV_DIR                        "3rd/opencv-4.12.0")
+set(OPENCV_INCLUDE_DIR                "${OPENCV_DIR}/include"
+                                      "${OPENCV_DIR}/${BUILD}/include"
+                                      "${OPENCV_DIR}/${BUILD}"
+                                      "/opt/homebrew/Cellar/opencv/4.13.0_2/include/opencv4")
+set(OPENCV_LIBRARY_DIR                "${OPENCV_DIR}/${BUILD}")
+set(OPENCV_LIBRARIES                  opencv_core opencv_imgproc opencv_imgcodecs)
+
+################################################################################
+##                                                                            ##
 ##                                 tesseract                                  ##
 ##                                                                            ##
 ################################################################################
@@ -120,6 +133,26 @@ set(TESSERACT_INCLUDE_DIR             "${TESSERACT_DIR}/include"
                                       "${TESSERACT_DIR}/${BUILD}/include")
 set(TESSERACT_LIBRARY_DIR             "${TESSERACT_DIR}/${BUILD}")
 set(TESSERACT_LIBRARIES               tesseract)
+
+################################################################################
+##                                                                            ##
+##                              paddleocr.cpp                                 ##
+##                                                                            ##
+################################################################################
+set(PADDLEOCRCPP_DIR                  "3rd/paddleocr.cpp")
+set(PADDLEOCRCPP_INCLUDE_DIR          "${PADDLEOCRCPP_DIR}")
+set(PADDLEOCRCPP_LIBRARY_DIR          "${PADDLEOCRCPP_DIR}/${BUILD}")
+set(PADDLEOCRCPP_LIBRARIES            PaddleOcrOnnx)
+
+################################################################################
+##                                                                            ##
+##                               onnxruntime                                  ##
+##                                                                            ##
+################################################################################
+set(ONNXRUNTIME_DIR                   "3rd/paddleocr.cpp/third_party/onnxruntime")
+set(ONNXRUNTIME_INCLUDE_DIR           "${ONNXRUNTIME_DIR}/include")
+set(ONNXRUNTIME_LIBRARY_DIR           "${ONNXRUNTIME_DIR}/lib")
+set(ONNXRUNTIME_LIBRARIES             onnxruntime)
 
 ################################################################################
 ##                                                                            ##
@@ -260,6 +293,9 @@ include_directories(
   ${GFC_INCLUDE_DIR}
   ${XPDF_INCLUDE_DIR}
   ${TESSERACT_INCLUDE_DIR}
+  ${PADDLEOCRCPP_INCLUDE_DIR}
+  ${OPENCV_INCLUDE_DIR}
+  ${ONNXRUNTIME_INCLUDE_DIR}
   ${LEPTONICA_INCLUDE_DIR}
   ${LIBPNG_INCLUDE_DIR}
   ${ZXING_INCLUDE_DIR}
@@ -276,6 +312,8 @@ link_directories(
   ${CJSON_LIBRARY_DIR}
   ${XPDF_LIBRARY_DIR}
   ${TESSERACT_LIBRARY_DIR}
+  ${PADDLEOCRCPP_LIBRARY_DIR}
+  ${ONNXRUNTIME_LIBRARY_DIR}
   ${LEPTONICA_LIBRARY_DIR}
   ${LIBPNG_LIBRARY_DIR}
   ${GFC_LIBRARY_DIR}
@@ -296,6 +334,8 @@ target_link_libraries(goo_shared
   ${CURL_LIBRARIES}
   ${XPDF_LIBRARIES}
   ${TESSERACT_LIBRARIES}
+  ${PADDLEOCRCPP_LIBRARIES}
+  ${ONNXRUNTIME_LIBRARIES}
   ${LEPTONICA_LIBRARIES}
   ${CJSON_LIBRARIES}
   ${LIBPNG_LIBRARIES}
@@ -499,6 +539,8 @@ target_link_libraries(goo-pdf-text
   ${XPDF_LIBRARIES}
   ${TESSERACT_LIBRARIES}
   ${LEPTONICA_LIBRARIES}
+  ${PADDLEOCRCPP_LIBRARIES}
+  ${ONNXRUNTIME_LIBRARIES}
   ${CJSON_LIBRARIES}
   ${LIBPNG_LIBRARIES}
   ${JVM_LIBRARIES}
@@ -519,6 +561,8 @@ target_link_libraries(goo-pdf-cmp
   ${XPDF_LIBRARIES}
   ${TESSERACT_LIBRARIES}
   ${LEPTONICA_LIBRARIES}
+  ${PADDLEOCRCPP_LIBRARIES}
+  ${ONNXRUNTIME_LIBRARIES}
   ${CJSON_LIBRARIES}
   ${LIBPNG_LIBRARIES}
   ${JVM_LIBRARIES}
@@ -539,6 +583,8 @@ target_link_libraries(goo-pdf-scan
   ${XPDF_LIBRARIES}
   ${TESSERACT_LIBRARIES}
   ${LEPTONICA_LIBRARIES}
+  ${PADDLEOCRCPP_LIBRARIES}
+  ${ONNXRUNTIME_LIBRARIES}
   ${CJSON_LIBRARIES}
   ${LIBPNG_LIBRARIES}
   ${JVM_LIBRARIES}
@@ -559,6 +605,8 @@ target_link_libraries(goo-pdf-png
   ${XPDF_LIBRARIES}
   ${TESSERACT_LIBRARIES}
   ${LEPTONICA_LIBRARIES}
+  ${PADDLEOCRCPP_LIBRARIES}
+  ${ONNXRUNTIME_LIBRARIES}
   ${CJSON_LIBRARIES}
   ${LIBPNG_LIBRARIES}
   ${JVM_LIBRARIES}
