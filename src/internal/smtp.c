@@ -30,6 +30,9 @@
 # include <winsock2.h>
 # include <ws2tcpip.h>
 #else /* POSIX */
+# define _POSIX_C_SOURCE 200112L
+# define _DEFAULT_SOURCE
+# include <sys/types.h>
 # include <netinet/in.h>
 # include <sys/select.h>
 # include <sys/socket.h>

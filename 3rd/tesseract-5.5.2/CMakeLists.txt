@@ -98,7 +98,7 @@ option(BUILD_TESTS "Build tests" OFF)
 option(USE_SYSTEM_ICU "Use system ICU" OFF)
 option(DISABLE_TIFF "Disable build with libtiff (if available)" OFF)
 option(DISABLE_ARCHIVE "Disable build with libarchive (if available)" OFF)
-option(DISABLE_CURL "Disable build with libcurl (if available)" OFF)
+option(DISABLE_CURL "Disable build with libcurl (if available)" ON)
 option(INSTALL_CONFIGS "Install tesseract configs" ON)
 
 # Build optimization options

@@ -18,6 +18,7 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 if (WIN32)
 elseif (APPLE)
@@ -65,7 +66,12 @@ set(CURL_LIBRARIES                    curl)
 ################################################################################
 set(LIBSSH2_DIR                       "3rd/libssh2-1.11.1")
 set(LIBSSH2_INCLUDE_DIR               "${LIBSSH2_DIR}/include")
-set(LIBSSH2_LIBRARY_DIR               "${LIBSSH2_DIR}/${BUILD}/src/.libs")
+if (WIN32)
+elseif (APPLE)
+  set(LIBSSH2_LIBRARY_DIR             "${LIBSSH2_DIR}/${BUILD}/src/.libs")
+elseif (UNIX)
+  set(LIBSSH2_LIBRARY_DIR             "${LIBSSH2_DIR}/${BUILD}/src")
+endif()
 set(LIBSSH2_LIBRARIES                 ssh2)
 
 ################################################################################
@@ -203,9 +209,15 @@ set(LIBPNG_LIBRARIES                  png)
 ################################################################################
 set(ZXING_DIR                         "3rd/zxing-cpp-2.3.0")
 set(ZXING_INCLUDE_DIR                 "${ZXING_DIR}/core/src"
-                                      "${ZXING_DIR}/build/darwin/core")
-set(ZXING_LIBRARY_DIR                 "${ZXING_DIR}/build/darwin/core")
-set(ZXING_LIBRARIES                   ZXing.2.3.0)
+                                      "${ZXING_DIR}/${BUILD}/core")
+set(ZXING_LIBRARY_DIR                 "${ZXING_DIR}/${BUILD}/core")
+if (WIN32)
+elseif (APPLE)
+  set(ZXING_LIBRARIES                 ZXing.2.3.0)
+elseif (UNIX)
+  set(ZXING_LIBRARIES                 ZXing)
+endif()
+
 
 ################################################################################
 ##                                                                            ##
@@ -324,10 +336,16 @@ link_directories(
 )
 
 add_library(goo STATIC ${GOOLIB_SOURCES})
-add_library(goo_shared SHARED ${GOOLIB_SOURCES})
-set_target_properties(goo_shared PROPERTIES OUTPUT_NAME goo)
+if (WIN32)
+elseif (APPLE)
+  add_library(goo_shared SHARED ${GOOLIB_SOURCES})
+  set_target_properties(goo_shared PROPERTIES OUTPUT_NAME goo)
+  set(LIBNAME                  "goo_shared")
+elseif (UNIX)
+  set(LIBNAME                  "goo")
+endif()
 
-target_link_libraries(goo_shared
+target_link_libraries(${LIBNAME}
   ${LIBSSH2_LIBRARIES}
   ${OPENSSL_LIBRARIES}
   ${MINIZIP_LIBRARIES}
