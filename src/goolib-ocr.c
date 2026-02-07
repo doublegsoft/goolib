@@ -31,7 +31,8 @@ using namespace PaddleOCR;
 static tesseract::TessBaseAPI* api = new tesseract::TessBaseAPI();
 
 // init ocr object
-static PPOCR ppocr = PPOCR();
+// static PaddleOCR::PaddleStructure engine = PaddleOCR::PaddleStructure();
+static PPOCR* ocr = new PPOCR();
 
 static std::string 
 goo_ocr_strip(const std::string& s) 

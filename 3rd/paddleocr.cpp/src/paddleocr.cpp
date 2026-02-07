@@ -21,6 +21,7 @@ namespace PaddleOCR {
 
 PPOCR::PPOCR() {
   if (FLAGS_det) {
+    FLAGS_det_model_dir = "/Users/christian/export/local/models/paddleocr/det";
     this->detector_ = new DBDetector(
         FLAGS_det_model_dir, FLAGS_use_gpu, FLAGS_gpu_id, FLAGS_gpu_mem,
         FLAGS_cpu_threads, FLAGS_enable_mkldnn, FLAGS_limit_type,
@@ -30,12 +31,14 @@ PPOCR::PPOCR() {
   }
 
   if (FLAGS_cls && FLAGS_use_angle_cls) {
+    FLAGS_cls_model_dir = "/Users/christian/export/local/models/paddleocr/cls";
     this->classifier_ = new Classifier(
         FLAGS_cls_model_dir, FLAGS_use_gpu, FLAGS_gpu_id, FLAGS_gpu_mem,
         FLAGS_cpu_threads, FLAGS_enable_mkldnn, FLAGS_cls_thresh,
         FLAGS_use_tensorrt, FLAGS_precision, FLAGS_cls_batch_num);
   }
   if (FLAGS_rec) {
+    FLAGS_rec_model_dir = "/Users/christian/export/local/models/paddleocr/rec";
     this->recognizer_ = new CRNNRecognizer(
         FLAGS_rec_model_dir, FLAGS_use_gpu, FLAGS_gpu_id, FLAGS_gpu_mem,
         FLAGS_cpu_threads, FLAGS_enable_mkldnn, FLAGS_rec_char_dict_path,

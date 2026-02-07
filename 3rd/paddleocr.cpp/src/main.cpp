@@ -11,6 +11,8 @@
 
 using namespace PaddleOCR;
 
+static PPOCR g_ocr = PPOCR();
+
 void check_params() {
   if (FLAGS_det) {
     if (FLAGS_det_model_dir.empty() || FLAGS_image_dir.empty()) {
@@ -164,6 +166,7 @@ void structure(std::vector<cv::String> &cv_all_img_names) {
 }
 
 int main(int argc, char **argv) {
+  std::cout << "hello" << std::endl;
   std::chrono::duration<float> inference_diff =
       std::chrono::steady_clock::now() - std::chrono::steady_clock::now();
   auto inference_start = std::chrono::steady_clock::now();
