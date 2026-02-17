@@ -20,10 +20,10 @@
 namespace PaddleOCR {
 
 PPOCR::PPOCR() {
+  std::string model_dir = "/Users/christian/export/local/models/paddleocr";
   if (FLAGS_det) {
-    FLAGS_det_model_dir = "/Users/christian/export/local/models/paddleocr/det";
     this->detector_ = new DBDetector(
-        FLAGS_det_model_dir, FLAGS_use_gpu, FLAGS_gpu_id, FLAGS_gpu_mem,
+        model_dir, FLAGS_use_gpu, FLAGS_gpu_id, FLAGS_gpu_mem,
         FLAGS_cpu_threads, FLAGS_enable_mkldnn, FLAGS_limit_type,
         FLAGS_limit_side_len, FLAGS_det_db_thresh, FLAGS_det_db_box_thresh,
         FLAGS_det_db_unclip_ratio, FLAGS_det_db_score_mode, FLAGS_use_dilation,
@@ -31,16 +31,14 @@ PPOCR::PPOCR() {
   }
 
   if (FLAGS_cls && FLAGS_use_angle_cls) {
-    FLAGS_cls_model_dir = "/Users/christian/export/local/models/paddleocr/cls";
     this->classifier_ = new Classifier(
-        FLAGS_cls_model_dir, FLAGS_use_gpu, FLAGS_gpu_id, FLAGS_gpu_mem,
+        model_dir, FLAGS_use_gpu, FLAGS_gpu_id, FLAGS_gpu_mem,
         FLAGS_cpu_threads, FLAGS_enable_mkldnn, FLAGS_cls_thresh,
         FLAGS_use_tensorrt, FLAGS_precision, FLAGS_cls_batch_num);
   }
   if (FLAGS_rec) {
-    FLAGS_rec_model_dir = "/Users/christian/export/local/models/paddleocr/rec";
     this->recognizer_ = new CRNNRecognizer(
-        FLAGS_rec_model_dir, FLAGS_use_gpu, FLAGS_gpu_id, FLAGS_gpu_mem,
+        model_dir, FLAGS_use_gpu, FLAGS_gpu_id, FLAGS_gpu_mem,
         FLAGS_cpu_threads, FLAGS_enable_mkldnn, FLAGS_rec_char_dict_path,
         FLAGS_use_tensorrt, FLAGS_precision, FLAGS_rec_batch_num,
         FLAGS_rec_img_h, FLAGS_rec_img_w);

@@ -133,23 +133,23 @@ void Classifier::Run(std::vector<cv::Mat> img_list,
 }
 
 void Classifier::LoadModel(const std::string &model_dir) {
-  std::cout << "Load model classification" << std::endl;
-  std::string model_file = model_dir + "/inference.onnx";
+  // std::cout << "Load model classification" << std::endl;
+  std::string model_file = model_dir + "/cls/inference.onnx";
   this->session = new Ort::Session(this->env, model_file.c_str(), this->sessionOptions);
   
   const size_t in_num = session->GetInputCount();
   Ort::AllocatorWithDefaultOptions allocator;
   for (int i = 0; i < in_num; ++i) {
     auto name = session->GetInputNameAllocated(i, allocator);
-    std::cout << "Input Name: " << name.get() << std::endl;
+    // std::cout << "Input Name: " << name.get() << std::endl;
     
     auto type_info = session->GetInputTypeInfo(i);
     auto tensor_info = type_info.GetTensorTypeAndShapeInfo();
     auto input_node_dims = tensor_info.GetShape();
-    printf("Input num_dims = %zu\n", input_node_dims.size());
-    for (size_t j = 0; j < input_node_dims.size(); j++) {
-      printf("Input dim[%zu] = %llu\n",j, input_node_dims[j]);
-    }
+    // printf("Input num_dims = %zu\n", input_node_dims.size());
+    // for (size_t j = 0; j < input_node_dims.size(); j++) {
+    //   printf("Input dim[%zu] = %llu\n",j, input_node_dims[j]);
+    // }
   }
 }
 
