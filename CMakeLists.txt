@@ -632,6 +632,26 @@ target_link_libraries(goo-pdf-png
   ${OTHER_LIBRARIES}
 )
 
+add_executable(goo-pdf-pages
+  "tool/goo-pdf-pages.c"
+)
+
+target_link_libraries(goo-pdf-pages
+  goo
+  ${ARGPARSE_LIBRARIES}
+  ${XPDF_LIBRARIES}
+  ${TESSERACT_LIBRARIES}
+  ${LEPTONICA_LIBRARIES}
+  ${PADDLEOCRCPP_LIBRARIES}
+  ${ONNXRUNTIME_LIBRARIES}
+  ${LIBPNG_LIBRARIES}
+  ${GFC_LIBRARIES}
+  ${CURL_LIBRARIES}
+  ${FREETYPE_LIBRARIES}
+  ${ZXING_LIBRARIES}
+  ${OTHER_LIBRARIES}
+)
+
 set_source_files_properties(
   "tool/goo-xlsx-write.c"
   PROPERTIES

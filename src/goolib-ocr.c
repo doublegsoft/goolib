@@ -24,11 +24,11 @@ using namespace PaddleOCR;
 #include "goolib-ocr.h"
 #include "goolib-error.h"
 
-static tesseract::TessBaseAPI* api = new tesseract::TessBaseAPI();
+static tesseract::TessBaseAPI* tess = NULL;
 
 // init ocr object
 // static PaddleOCR::PaddleStructure engine = PaddleOCR::PaddleStructure();
-static PPOCR* ocr = new PPOCR();
+static PPOCR* ppocr = NULL;
 
 static std::string 
 goo_ocr_strip(const std::string& s) 
@@ -102,22 +102,24 @@ goo_ocr_cmp(const std::string& a, const std::string& b)
 int
 goo_ocr_init(const char* tessdata, const char* langs)
 {
-  if (api->Init(tessdata, langs)) 
+  tess = new tesseract::TessBaseAPI();
+  ppocr = new PPOCR();
+  if (tess->Init(tessdata, langs)) 
   {
     fprintf(stderr, "Could not initialize tesseract.\n");
-    delete api;
+    delete tess;
     return GOO_ERROR_FAILURE;
   }
-  api->SetPageSegMode(tesseract::PSM_SINGLE_BLOCK);
-  api->SetVariable("debug_file", "/dev/null");
-  // api->SetPageSegMode(tesseract::PSM_SINGLE_LINE);
+  tess->SetPageSegMode(tesseract::PSM_SINGLE_BLOCK);
+  tess->SetVariable("debug_file", "/dev/null");
+  // tess->SetPageSegMode(tesseract::PSM_SINGLE_LINE);
   return GOO_SUCCESS;
 }
 
 void*
 goo_ocr_api(void)
 {
-  return (void*)api;
+  return (void*)tess;
 }
 
 int
@@ -127,8 +129,8 @@ goo_ocr_text(const unsigned char* img,
              int channels, 
              char** text)
 {
-  api->SetImage(img, width, height, channels, width * channels);  
-  *text = api->GetUTF8Text();
+  tess->SetImage(img, width, height, channels, width * channels);  
+  *text = tess->GetUTF8Text();
   return GOO_SUCCESS;
 }
 
@@ -142,10 +144,10 @@ goo_ocr_eq(const unsigned char* img1,
            int h2, 
            int c2)
 {
-  api->SetImage(img1, w1, h1, c1, w1 * c1);  
-  char* text1 = api->GetUTF8Text();
-  api->SetImage(img2, w2, h2, c2, w2 * c2);  
-  char* text2 = api->GetUTF8Text();
+  tess->SetImage(img1, w1, h1, c1, w1 * c1);  
+  char* text1 = tess->GetUTF8Text();
+  tess->SetImage(img2, w2, h2, c2, w2 * c2);  
+  char* text2 = tess->GetUTF8Text();
   const std::string s1(text1);
   const std::string s2(text2);
   if (goo_ocr_cmp(s1, s2)) {

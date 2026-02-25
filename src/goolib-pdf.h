@@ -97,6 +97,20 @@ goo_pdf_scan(const char* pdf_path,
              char** text,
              char** error);
 
+
+/*!
+** Get total page count of a PDF file.
+**
+** This function opens the specified PDF document using Xpdf's PDFDoc
+** and returns the total number of pages.
+**
+** @param pdf_path Absolute or relative path to the PDF file.
+** @return Number of pages in the document.
+**         Returns 0 if the document cannot be opened or is invalid.
+*/
+int
+goo_pdf_pages(const char* pdf_path);
+
 #ifdef __cplusplus
 }
 #endif

@@ -190,7 +190,7 @@ goo_pdf_png(const char* pdf_path,
   }
 
   GString* fname = new GString(pdf_path);
-  PDFDoc* doc = new PDFDoc(fname); // doc owns fname
+  PDFDoc* doc = new PDFDoc(fname); 
 
   if (!doc->isOk()) {
     delete doc;
@@ -250,6 +250,27 @@ goo_pdf_png(const char* pdf_path,
 }
 
 int
+goo_pdf_pages(const char* pdf_path)
+{
+  if (!pdf_path) {
+    return 0;
+  }
+
+  GString* fname = new GString(pdf_path);
+  PDFDoc* doc = new PDFDoc(fname); 
+
+  if (!doc || !doc->isOk()) {
+    delete doc;
+    return 0;
+  }
+  int ret = doc->getNumPages();
+
+  delete doc;
+  return ret;
+}
+
+
+int
 goo_pdf_scan(const char* pdf_path, 
              int page, 
              int x, 
@@ -277,3 +298,4 @@ goo_pdf_scan(const char* pdf_path,
   }
   return goo_png_scan(png_data, w, h, chans, text);
 }
+
