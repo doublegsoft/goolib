@@ -7,28 +7,11 @@
 **  ▀██▄▄███  ▀██▄▄██▀  ▀██▄▄██▀    ██▄▄▄   ▄▄▄██▄▄▄  ███▄▄██▀ 
 **   ▄▀▀▀ ██    ▀▀▀▀      ▀▀▀▀       ▀▀▀▀   ▀▀▀▀▀▀▀▀  ▀▀ ▀▀▀   
 **   ▀████▀▀ 
-*/                        
-#include <stdlib.h>
-#include <stdarg.h>
-#include <string.h>
-#include <stdio.h>
+*/  
+#include "goolib-html.h"
 
-char*
-goo_error_new(const char* format, ...)
+void
+goo_html_chatgpt(const char* html, char** md, size_t* md_len)
 {
-  va_list ap;
-  va_start(ap, format);
 
-  int len = vsnprintf(NULL, 0, format, ap);
-  if (len < 0) { va_end(ap); return NULL; }
-
-  char *res = malloc(len + 1);
-  if (!res) { va_end(ap); return NULL; }
-
-  va_list ap2;
-  va_copy(ap2, ap);
-  vsnprintf(res, len + 1, format, ap2);
-  va_end(ap2);
-  va_end(ap);
-  return res;
 }

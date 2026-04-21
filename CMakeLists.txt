@@ -215,7 +215,6 @@ elseif (UNIX)
   set(ZXING_LIBRARIES                 ZXing)
 endif()
 
-
 ################################################################################
 ##                                                                            ##
 ##                                    cjson                                   ##
@@ -241,6 +240,16 @@ set(JVM_INCLUDE_DIR                   "${JVM_DIR}/include"
                                       "${JVM_DIR}/include/${PLATFORM}")
 set(JVM_LIBRARY_DIR                   "${JVM_DIR}/lib/server")
 set(JVM_LIBRARIES                     jvm)
+
+################################################################################
+##                                                                            ##
+##                                  html2md                                   ##
+##                                                                            ##
+################################################################################
+set(HTML2MD_DIR                       "3rd/html2md-1.7.0")
+set(HTML2MD_INCLUDE_DIR               "${HTML2MD_DIR}")
+set(HTML2MD_LIBRARY_DIR               "${HTML2MD_DIR}/${BUILD}")
+set(HTML2MD_LIBRARIES                 html2md-static)
 
 ################################################################################
 ##                                                                            ##
