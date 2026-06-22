@@ -24,6 +24,25 @@ elseif (UNIX)
   set(PLATFORM                          "linux")
 endif()
 
+if(APPLE)
+  # 1. Enable MACOSX_RPATH (default ON in CMake 3.0+)
+  # This ensures that compiled dylibs are built with "@rpath/libname.dylib" as their install name.
+  set(CMAKE_MACOSX_RPATH TRUE)
+
+  # 2. Use the install RPATH directly during the build tree
+  set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+
+  # 3. Define the LC_RPATH search directories
+  # On macOS, @loader_path resolves to the directory containing the loading binary (safest).
+  # @executable_path resolves to the directory of the main executable.
+  set(CMAKE_INSTALL_RPATH "@loader_path;@loader_path/../Frameworks")
+else()
+  # Linux uses $ORIGIN. 
+  # Note: We escape the '$' with a backslash (\$) so CMake doesn't try 
+  # to evaluate it as a CMake variable.
+  set(CMAKE_INSTALL_RPATH "\$ORIGIN")
+endif()
+
 set(BUILD                             "build/${PLATFORM}")
 
 ################################################################################
@@ -34,7 +53,7 @@ set(BUILD                             "build/${PLATFORM}")
 set(ARGPARSE_DIR                      "3rd/argparse-1.1.0")
 set(ARGPARSE_INCLUDE_DIR              "${ARGPARSE_DIR}")
 set(ARGPARSE_LIBRARY_DIR              "${ARGPARSE_DIR}/${BUILD}")
-set(ARGPARSE_LIBRARIES                argparse)
+set(ARGPARSE_LIBRARIES                libargparse.a)
 
 ################################################################################
 ##                                                                            ##
@@ -122,7 +141,7 @@ set(OPENCV_DIR                        "3rd/opencv-4.12.0")
 set(OPENCV_INCLUDE_DIR                "${OPENCV_DIR}/include"
                                       "${OPENCV_DIR}/${BUILD}/include"
                                       "${OPENCV_DIR}/${BUILD}"
-                                      "/opt/homebrew/Cellar/opencv/4.13.0_2/include/opencv4")
+                                      "/opt/homebrew/Cellar/opencv/4.13.0_7/include/opencv4")
 set(OPENCV_LIBRARY_DIR                "${OPENCV_DIR}/${BUILD}")
 set(OPENCV_LIBRARIES                  opencv_core opencv_imgproc opencv_imgcodecs)
 
@@ -162,7 +181,7 @@ set(ONNXRUNTIME_LIBRARIES             onnxruntime)
 ##                                 leptonica                                  ##
 ##                                                                            ##
 ################################################################################
-set(LEPTONICA_DIR                     "/opt/homebrew/Cellar/leptonica/1.86.0")
+set(LEPTONICA_DIR                     "/opt/homebrew/Cellar/leptonica/1.87.0")
 set(LEPTONICA_INCLUDE_DIR             "${LEPTONICA_DIR}/include")
 set(LEPTONICA_LIBRARY_DIR             "${LEPTONICA_DIR}/lib")
 set(LEPTONICA_LIBRARIES               leptonica)
@@ -172,7 +191,7 @@ set(LEPTONICA_LIBRARIES               leptonica)
 ##                                  freetype                                  ##
 ##                                                                            ##
 ################################################################################
-set(FREETYPE_DIR                      "/opt/homebrew/Cellar/freetype/2.14.1_1")
+set(FREETYPE_DIR                      "/opt/homebrew/Cellar/freetype/2.14.3")
 set(FREETYPE_INCLUDE_DIR              "${FREETYPE_DIR}/include/freetype2")
 set(FREETYPE_LIBRARY_DIR              "${FREETYPE_DIR}/lib")
 set(FREETYPE_LIBRARIES                freetype)

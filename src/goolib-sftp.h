@@ -16,13 +16,22 @@ extern "C" {
 #endif
 
 int 
-goo_sftp_upload(const char* host, 
-                int port,
-                const char* user, 
-                const char* password, 
-                const char* local_path, 
-                const char* remote_path, 
-                char** error);
+goo_sftp_file(const char* host, 
+              int port,
+              const char* username, 
+              const char* password, 
+              const char* local_path, 
+              const char* remote_path, 
+              char** error);
+
+int 
+goo_sftp_dir(const char* host, 
+             int port,
+             const char* username, 
+             const char* password, 
+             const char* local_dir, 
+             const char* remote_dir, 
+             char** error);                
 
 #ifdef __cplusplus
 }
