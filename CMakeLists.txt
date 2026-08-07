@@ -18,6 +18,7 @@ set(CMAKE_C_EXTENSIONS OFF)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 if (WIN32)
+  set(PLATFORM                          "win32")
 elseif (APPLE)
   set(PLATFORM                          "darwin")
 elseif (UNIX)
