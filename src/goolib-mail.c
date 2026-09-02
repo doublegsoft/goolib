@@ -23,16 +23,30 @@
 #include "goolib-util.h"
 #include "goolib-mail.h"
 
+/*!
+** IMAP 收件箱回调函数，用于从服务器响应数据中提取 "UIDNEXT" 的值。
+**
+** @param contents 指向接收到的数据缓冲区的指针。
+** @param size 每个数据元素的大小。
+** @param nmemb 数据元素的数量。
+** @param userp 用户自定义指针，此处用于接收输出的 UID 字符串缓冲区。
+** @return 实际处理的字节数。
+*/
 static size_t 
 goo_mail_inbox_cb(void* contents, size_t size, size_t nmemb, void* userp) 
 {
   char* uid = (char*) userp;
   char* str = (char*) contents;
+  
+  // 在响应报文中查找 "UIDNEXT" 关键字的位置
   char* uidnext = strstr(str, "UIDNEXT");
   if (uidnext != NULL)
   {
+    // 跳过 "UIDNEXT " 的长度，将指针移动到具体数值的起始位置
     char* val = uidnext + strlen("UIDNEXT ");
     int index = 0;
+    
+    // 循环拷贝字符，直到遇到右中括号 ']' 结束
     while (*val != ']') 
     {
       uid[index++] = *val;
@@ -43,13 +57,25 @@ goo_mail_inbox_cb(void* contents, size_t size, size_t nmemb, void* userp)
   return size * nmemb;
 }
 
+/*!
+** 邮件数据流回调函数，用于将接收到的邮件数据块直接写入文件。
+**
+** @param contents 指向接收到的数据缓冲区的指针。
+** @param size 每个数据元素的大小。
+** @param nmemb 数据元素的数量.
+** @param userp 用户自定义指针，此处为指向目标 FILE 结构体的指针。
+** @return 写入文件的实际数据字节数。
+*/
 static size_t 
 goo_mail_latest_cb(void* contents, size_t size, size_t nmemb, void* userp) 
 {
   FILE* fp = (FILE*) userp;
+  
+  // 将当前数据分片直接写入文件，并刷新缓冲区
   fwrite(contents, size, nmemb, fp);
   fflush(fp);
 
+  // 备用方案（已注释）：在内存中动态分配并拼接完整的邮件内容字符串
   // char** str = (char**) userp;
   // if (*str == NULL) 
   // {
@@ -66,13 +92,26 @@ goo_mail_latest_cb(void* contents, size_t size, size_t nmemb, void* userp)
   return size * nmemb;
 }
 
+/*!
+** 从原始邮件头信息字符串中，提取指定头部字段的值（如 "Subject:", "From:"）。
+**
+** @param str 包含完整邮件头部信息的字符串。
+** @param header 需要检索的头部字段名称（需包含冒号和空格，例如 "Subject: "）。
+** @return 动态分配的包含头部字段值的字符串。未找到时返回 NULL。
+**         注意：调用者需负责 free 释放返回的内存。
+*/
 static char* 
 goo_mail_header_get(char* str, const char* header)
 {
+  // 定位目标头部字段在头部信息中的起始位置
   char* found = strstr(str, header);
   if (found == NULL)
     return NULL;
+    
+  // 将指针向后移动，跳过字段名称本身，指向字段值的起点
   found += strlen(header);
+  
+  // 计算该头部字段值的实际长度（直到遇到换行符 \n 或 \r）
   int len = 0;
   char* scan = found;
   while (*scan != '\n' && *scan != '\r') 
@@ -80,14 +119,19 @@ goo_mail_header_get(char* str, const char* header)
     scan++;
     len++;
   }
+  
+  // 为提取的值分配内存（包含额外的空字符终止符 \0）
   char* ret = (char*) malloc(len + 1);
   int index = 0;
+  
+  // 将该字段的值拷贝到新分配的内存空间中
   while (*found != '\n' && *found != '\r')
   {
     ret[index++] = *found;
     found++;
   }
   ret[index] = '\0';
+  
   return ret;
 }
 
