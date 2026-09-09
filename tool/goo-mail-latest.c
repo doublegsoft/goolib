@@ -86,7 +86,7 @@ goo_mail_header_get(char* str, const char* header)
   
   int len = 0;
   char* scan = found;
-  while (*scan != '\n' && *scan != '\r') 
+  while (*scan != '\n' && *scan != '\r' && *scan != '"') 
   {
     scan++;
     len++;
