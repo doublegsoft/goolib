@@ -134,6 +134,111 @@ goo_mail_header_get(char* str, const char* header)
   return ret;
 }
 
+/*!
+** 从下载的 raw 邮件文件 (mail.txt) 中提取纯文本正文内容
+**
+** @param mail_file 邮件临时文件路径 (如 /tmp/mail.txt)
+** @return 动态分配的正文字符串指针（调用方需负责 free() 释放）
+*/
+static char* 
+goo_mail_body(const char* mail_file)
+{
+  FILE* fp = fopen(mail_file, "r");
+  if (fp == NULL)
+    return NULL;
+
+  char line[1024];
+  int in_text_part = 0;
+  int is_base64 = 0;
+  int start_reading = 0;
+
+  // 动态扩容的正文缓冲区
+  size_t body_cap = 4096;
+  size_t body_len = 0;
+  char* body_buf = (char*) malloc(body_cap);
+  body_buf[0] = '\0';
+
+  while (fgets(line, sizeof(line), fp) != NULL)
+  {
+    // 1. 寻找纯文本区域
+    if (strstr(line, "Content-Type: text/plain") != NULL)
+    {
+      in_text_part = 1;
+      continue;
+    }
+
+    // 2. 检查正文的传输编码是否为 Base64
+    if (in_text_part && !start_reading)
+    {
+      if (strstr(line, "Content-Transfer-Encoding: base64") != NULL ||
+          strstr(line, "content-transfer-encoding: base64") != NULL)
+      {
+        is_base64 = 1;
+      }
+    }
+
+    // 3. 遇到空行（\r\n），表示正文头部结束，正文内容开始
+    if (in_text_part && !start_reading && (line[0] == '\r' || line[0] == '\n'))
+    {
+      start_reading = 1;
+      continue;
+    }
+
+    // 4. 读取正文数据
+    if (start_reading)
+    {
+      // 遇到 MIME 分割线（--xxxx），说明正文结束
+      if (strncmp(line, "--", 2) == 0)
+      {
+        break;
+      }
+
+      size_t line_len = strlen(line);
+      // 动态扩容
+      if (body_len + line_len + 1 >= body_cap)
+      {
+        body_cap *= 2;
+        body_buf = (char*) realloc(body_buf, body_cap);
+      }
+
+      memcpy(body_buf + body_len, line, line_len);
+      body_len += line_len;
+      body_buf[body_len] = '\0';
+    }
+  }
+  fclose(fp);
+
+  if (body_len == 0)
+  {
+    free(body_buf);
+    return NULL;
+  }
+
+  // 5. 如果正文被 Base64 编码过，进行解码
+  if (is_base64)
+  {
+    BIO* b64 = BIO_new(BIO_f_base64());
+    BIO* mem = BIO_new_mem_buf(body_buf, (int)body_len);
+    BIO* bio = BIO_push(b64, mem);
+
+    char* decoded_buf = (char*) calloc(1, body_len + 1);
+    int decoded_len = BIO_read(bio, decoded_buf, (int)body_len);
+    
+    BIO_free_all(bio);
+    free(body_buf);
+
+    if (decoded_len > 0)
+    {
+      decoded_buf[decoded_len] = '\0';
+      return decoded_buf;
+    }
+    free(decoded_buf);
+    return NULL;
+  }
+
+  return body_buf;
+}
+
 int 
 goo_mail_request(const char* mail_imap_url,
                  const char* mail_imap_port,
@@ -243,6 +348,7 @@ goo_mail_latest(const char* mail_imap_host,
                 const char* mail_imap_password,
                 const char* temp_dir,
                 const char* download_dir,
+                char**      body,
                 char**      error)
 {
   char inbox_url[4096] = {'\0'};
@@ -284,7 +390,6 @@ goo_mail_latest(const char* mail_imap_host,
 
   printf("[INFO] 发现最新未读邮件，目标 UID: %ld\n", uid);
 
-  // 3. 构造根据 UID 下载邮件的 URL
   char url[4096] = {'\0'};
   snprintf(url, sizeof(url), "imaps://%s/INBOX;uid=%ld", mail_imap_host, uid);
   
@@ -316,6 +421,9 @@ goo_mail_latest(const char* mail_imap_host,
     remove(tmpmail);
     return status;
   }
+
+  char* mail_body = goo_mail_body(tmpmail);
+  printf("%s\n", mail_body);
 
   // 4. 将该邮件在服务端标记为已读 (\Seen)
   char store_cmd[128] = {'\0'};
