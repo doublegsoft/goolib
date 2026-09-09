@@ -12,7 +12,9 @@
 #define GOOLIB_ERROR_H
 
 #define GOO_SUCCESS                         0
-#define GOO_ERROR_FAILURE                   1
+#define GOO_ERROR_FAILURE                   -1
+
+#define GOO_ERROR_NO_MAIL                   1
 
 #ifdef __cplusplus
 extern "C" {

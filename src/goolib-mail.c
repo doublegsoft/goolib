@@ -10,9 +10,11 @@
 */ 
 #define GOOLIB_MAIL_H
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <libgen.h>
 #include <string.h>
+#include <ctype.h>
 
 #include <curl/curl.h>
 #include <openssl/bio.h>
@@ -24,94 +26,93 @@
 #include "goolib-mail.h"
 
 /*!
-** IMAP 收件箱回调函数，用于从服务器响应数据中提取 "UIDNEXT" 的值。
-**
-** @param contents 指向接收到的数据缓冲区的指针。
-** @param size 每个数据元素的大小。
-** @param nmemb 数据元素的数量。
-** @param userp 用户自定义指针，此处用于接收输出的 UID 字符串缓冲区。
-** @return 实际处理的字节数。
+** 解码 RFC 2047 MIME 编码的文件名（例如将 =?UTF-8?B?... 还原为真实的中文原文件名）
+*/
+static void 
+decode_mime_filename(char* dest, const char* src)
+{
+  if (src == NULL || *src == '\0')
+  {
+    dest[0] = '\0';
+    return;
+  }
+
+  // 检查是否包含 UTF-8 Base64 编码标识
+  const char* p_start = strstr(src, "=?UTF-8?B?");
+  if (p_start == NULL)
+    p_start = strstr(src, "=?utf-8?B?");
+  if (p_start == NULL)
+    p_start = strstr(src, "=?UTF-8?b?");
+
+  if (p_start != NULL)
+  {
+    p_start += 10; // 跳过 "=?UTF-8?B?"
+    const char* p_end = strstr(p_start, "?=");
+    if (p_end != NULL)
+    {
+      char b64_str[2048] = {'\0'};
+      size_t b64_len = p_end - p_start;
+      if (b64_len < sizeof(b64_str))
+      {
+        strncpy(b64_str, p_start, b64_len);
+
+        BIO* b64 = BIO_new(BIO_f_base64());
+        BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL);
+        BIO* mem = BIO_new_mem_buf(b64_str, (int)b64_len);
+        BIO* bio = BIO_push(b64, mem);
+
+        int decoded_len = BIO_read(bio, dest, 4096);
+        if (decoded_len > 0)
+        {
+          dest[decoded_len] = '\0';
+          BIO_free_all(bio);
+          return;
+        }
+        BIO_free_all(bio);
+      }
+    }
+  }
+
+  // 如果不是 MIME 编码格式，直接保留原文件名
+  strcpy(dest, src);
+}
+
+/*!
+** 用于接收 "UID SEARCH UNSEEN" 服务器响应数据的回调函数
 */
 static size_t 
-goo_mail_inbox_cb(void* contents, size_t size, size_t nmemb, void* userp) 
+goo_mail_search_cb(void* contents, size_t size, size_t nmemb, void* userp) 
 {
-  char* uid = (char*) userp;
-  char* str = (char*) contents;
-  
-  // 在响应报文中查找 "UIDNEXT" 关键字的位置
-  char* uidnext = strstr(str, "UIDNEXT");
-  if (uidnext != NULL)
-  {
-    // 跳过 "UIDNEXT " 的长度，将指针移动到具体数值的起始位置
-    char* val = uidnext + strlen("UIDNEXT ");
-    int index = 0;
-    
-    // 循环拷贝字符，直到遇到右中括号 ']' 结束
-    while (*val != ']') 
-    {
-      uid[index++] = *val;
-      val++;
-    }
-    uid[index] = '\0';
-  }
-  return size * nmemb;
+  size_t total = size * nmemb;
+  char* buf = (char*) userp;
+  strncat(buf, (char*) contents, total);
+  return total;
 }
 
 /*!
 ** 邮件数据流回调函数，用于将接收到的邮件数据块直接写入文件。
-**
-** @param contents 指向接收到的数据缓冲区的指针。
-** @param size 每个数据元素的大小。
-** @param nmemb 数据元素的数量.
-** @param userp 用户自定义指针，此处为指向目标 FILE 结构体的指针。
-** @return 写入文件的实际数据字节数。
 */
 static size_t 
-goo_mail_latest_cb(void* contents, size_t size, size_t nmemb, void* userp) 
+goo_mail_download(void* contents, size_t size, size_t nmemb, void* userp) 
 {
   FILE* fp = (FILE*) userp;
-  
-  // 将当前数据分片直接写入文件，并刷新缓冲区
   fwrite(contents, size, nmemb, fp);
   fflush(fp);
-
-  // 备用方案（已注释）：在内存中动态分配并拼接完整的邮件内容字符串
-  // char** str = (char**) userp;
-  // if (*str == NULL) 
-  // {
-  //   *str = (char*) malloc(size * nmemb + 1);
-  //   memcpy(*str, contents, size * nmemb);
-  //   (*str)[size * nmemb] = '\0';
-  // }
-  // else 
-  // {
-  //   *str = (char*) realloc(*str, strlen(*str) + size * nmemb + 1);
-  //   memcpy(*str + strlen(*str), contents, size * nmemb);
-  //   (*str)[strlen(*str) + size * nmemb] = '\0';
-  // }
   return size * nmemb;
 }
 
 /*!
 ** 从原始邮件头信息字符串中，提取指定头部字段的值（如 "Subject:", "From:"）。
-**
-** @param str 包含完整邮件头部信息的字符串。
-** @param header 需要检索的头部字段名称（需包含冒号和空格，例如 "Subject: "）。
-** @return 动态分配的包含头部字段值的字符串。未找到时返回 NULL。
-**         注意：调用者需负责 free 释放返回的内存。
 */
 static char* 
 goo_mail_header_get(char* str, const char* header)
 {
-  // 定位目标头部字段在头部信息中的起始位置
   char* found = strstr(str, header);
   if (found == NULL)
     return NULL;
     
-  // 将指针向后移动，跳过字段名称本身，指向字段值的起点
   found += strlen(header);
   
-  // 计算该头部字段值的实际长度（直到遇到换行符 \n 或 \r）
   int len = 0;
   char* scan = found;
   while (*scan != '\n' && *scan != '\r') 
@@ -120,11 +121,9 @@ goo_mail_header_get(char* str, const char* header)
     len++;
   }
   
-  // 为提取的值分配内存（包含额外的空字符终止符 \0）
   char* ret = (char*) malloc(len + 1);
   int index = 0;
   
-  // 将该字段的值拷贝到新分配的内存空间中
   while (*found != '\n' && *found != '\r')
   {
     ret[index++] = *found;
@@ -157,7 +156,8 @@ goo_mail_request(const char* mail_imap_url,
     curl_easy_setopt(curl, CURLOPT_USERNAME, mail_imap_user);
     curl_easy_setopt(curl, CURLOPT_PASSWORD, mail_imap_password);
     curl_easy_setopt(curl, CURLOPT_URL, mail_imap_url);
-    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, custom_request);
+    if (custom_request != NULL)
+      curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, custom_request);
 
     if (cb != NULL)
       curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, cb);
@@ -167,9 +167,14 @@ goo_mail_request(const char* mail_imap_url,
     res = curl_easy_perform(curl);
 
     if(res != CURLE_OK)
-      fprintf(stderr, 
-              "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+    {
+      if (error != NULL)
+        *error = strdup(curl_easy_strerror(res));
+      fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+      curl_easy_cleanup(curl);
+      curl_global_cleanup();
+      return GOO_ERROR_FAILURE;
+    }
  
     curl_easy_cleanup(curl);
   }
@@ -240,107 +245,167 @@ goo_mail_latest(const char* mail_imap_host,
                 const char* download_dir,
                 char**      error)
 {
+  char inbox_url[4096] = {'\0'};
+  snprintf(inbox_url, sizeof(inbox_url), "imaps://%s/INBOX", mail_imap_host);
+
+  // 1. 查询收件箱中所有未读邮件的 UID
+  char search_buf[4096] = {'\0'};
+  int status = goo_mail_request(inbox_url, 
+                                mail_imap_port,
+                                mail_imap_user,
+                                mail_imap_password,
+                                "UID SEARCH UNSEEN",
+                                goo_mail_search_cb,
+                                search_buf,
+                                error);
+  if (status != GOO_SUCCESS)
+    return status;
+
+  // 2. 提取最后一个 UID (即最新的一封未读邮件)
+  long uid = -1;
+  char* token = strtok(search_buf, " \r\n");
+  while (token != NULL)
+  {
+    long val = strtol(token, NULL, 10);
+    if (val > 0)
+    {
+      uid = val; // 遍历覆盖，最终保留最后一个（最新的）UID
+    }
+    token = strtok(NULL, " \r\n");
+  }
+
+  // 没有未读邮件
+  if (uid <= 0) 
+  {
+    if (error != NULL)
+      *error = strdup("No unseen mail found");
+    return GOO_ERROR_NO_MAIL;
+  }
+
+  printf("[INFO] 发现最新未读邮件，目标 UID: %ld\n", uid);
+
+  // 3. 构造根据 UID 下载邮件的 URL
   char url[4096] = {'\0'};
-  strcpy(url, "imaps://");
-  strcat(url, mail_imap_host);
-  strcat(url, "/INBOX");
-
-  char* uidnext = (char*) malloc(128);
-  goo_mail_request(url, 
-                   mail_imap_port,
-                   mail_imap_user,
-                   mail_imap_password,
-                   "SELECT INBOX",
-                   goo_mail_inbox_cb,
-                   uidnext,
-                   error);
-  
-  long uid = strtol(uidnext, NULL, 10);
-  uid -= 1;
-  free(uidnext);
-  
-  char uidstr[128] = {'\0'};
-  sprintf(uidstr, "%ld", uid);
-
-  strcpy(url, "imaps://");
-  strcat(url, mail_imap_host);
-  strcat(url, "/INBOX;uid=");
-  strcat(url, uidstr);
+  snprintf(url, sizeof(url), "imaps://%s/INBOX;uid=%ld", mail_imap_host, uid);
   
   char tmpmail[8192] = {'\0'};
-  strcpy(tmpmail, temp_dir);
-  strcat(tmpmail, "/mail.txt");
+  snprintf(tmpmail, sizeof(tmpmail), "%s/mail.txt", temp_dir);
 
   char tmpatt[8192] = {'\0'};
-  strcpy(tmpatt, temp_dir);
-  strcat(tmpatt, "/att.txt");
+  snprintf(tmpatt, sizeof(tmpatt), "%s/att.txt", temp_dir);
   
   FILE* fp = fopen(tmpmail, "w");
   if (fp == NULL)
   {
-    *error = strdup("failed to open file");
+    if (error != NULL)
+      *error = strdup("failed to open file for writing mail");
     return GOO_ERROR_FAILURE;
   }
-  goo_mail_request(url, 
+
+  status = goo_mail_request(url, 
+                            mail_imap_port,
+                            mail_imap_user,
+                            mail_imap_password,
+                            NULL,
+                            goo_mail_download,
+                            (void*)fp,
+                            error);
+  fclose(fp);                 
+  if (status != GOO_SUCCESS)
+  {
+    remove(tmpmail);
+    return status;
+  }
+
+  // 4. 将该邮件在服务端标记为已读 (\Seen)
+  char store_cmd[128] = {'\0'};
+  snprintf(store_cmd, sizeof(store_cmd), "UID STORE %ld +FLAGS (\\Seen)", uid);
+  goo_mail_request(inbox_url,
                    mail_imap_port,
                    mail_imap_user,
                    mail_imap_password,
+                   store_cmd,
                    NULL,
-                   goo_mail_latest_cb,
-                   (void*)fp,
-                   error);
+                   NULL,
+                   NULL);
 
-  fclose(fp);                 
-  
+  // 5. 解析邮件原始文件，提取附件
   FILE* fpb64 = fopen(tmpatt, "w");
   if (fpb64 == NULL)
   {
-    *error = strdup("failed to open file");
+    if (error != NULL)
+      *error = strdup("failed to open file for writing attachment");
+    remove(tmpmail);
     return GOO_ERROR_FAILURE;
   }
-  fp = fopen(tmpmail, "r");
 
+  fp = fopen(tmpmail, "r");
+  if (fp == NULL)
+  {
+    if (error != NULL)
+      *error = strdup("failed to open mail file for reading");
+    fclose(fpb64);
+    remove(tmpmail);
+    remove(tmpatt);
+    return GOO_ERROR_FAILURE;
+  }
+
+  char raw_attname[8192] = {'\0'};
   char attname[8192] = {'\0'};
-  char* prevline = NULL;
   char line[1024];
-  int found_attachment = 0;
+  int in_attachment_header = 0;
   int start_attachment = 0;
 
-  while (fgets(line, 1024, fp) != NULL) 
+  while (fgets(line, sizeof(line), fp) != NULL) 
   {
-    if (strstr(line, "Content-Type: application") != NULL)
+    // 进入附件头部区域判断（兼容顺序颠倒）
+    if (strstr(line, "Content-Disposition: attachment") != NULL ||
+        strstr(line, "Content-Type: application") != NULL)
     {
-      found_attachment = 1;
+      in_attachment_header = 1;
+    }
+
+    // 在头部区域提取文件名（兼容换行及 name= 语法）
+    if (in_attachment_header && raw_attname[0] == '\0')
+    {
+      const char* fn_pos = strstr(line, "filename=");
+      if (fn_pos == NULL)
+        fn_pos = strstr(line, "name=");
+
+      if (fn_pos != NULL)
+      {
+        fn_pos += (strstr(line, "filename=") != NULL) ? 9 : 5;
+        
+        // 去除前面可能有的空格和双引号
+        while (*fn_pos == ' ' || *fn_pos == '"' || *fn_pos == '\'')
+          fn_pos++;
+
+        int idx = 0;
+        while (*fn_pos != '\0' && *fn_pos != '\r' && *fn_pos != '\n' && 
+               *fn_pos != '"' && *fn_pos != ';' && *fn_pos != '\'')
+        {
+          raw_attname[idx++] = *fn_pos;
+          fn_pos++;
+        }
+        raw_attname[idx] = '\0';
+      }
+    }
+
+    // 遇到连续换行符，说明头部结束，接下来是 Base64 数据体
+    if (in_attachment_header && (line[0] == '\r' || line[0] == '\n'))
+    {
+      start_attachment = 1;
+      in_attachment_header = 0;
       continue;
     }
-    if (found_attachment == 1)
-    {
-      const char* attstr = "Content-Disposition: attachment; filename=";
-      if (strstr(line, "Content-Disposition: attachment; filename=") != NULL)
-      {
-        char* scan = line + strlen(attstr);
-        int index = 0;
-        while (*scan != '\r' && *scan != '\n')
-        {
-          attname[index++] = *scan;
-          scan++;
-        }
-        attname[index] = '\0';
-      }
-      if (line[0] == '\r' && line[1] == '\n')
-      {
-        start_attachment = 1;
-        continue;
-      }
-    }
+
+    // 写入 Base64 编码的数据
     if (start_attachment == 1)
     {
-      
-      if (strstr(line, "------") == line)
+      if (strstr(line, "------") == line || strstr(line, "--") == line)
       {
         start_attachment = 0;
-        found_attachment = 0;
-        continue;
+        break;
       }
       fwrite(line, 1, strlen(line), fpb64);
       fflush(fpb64);
@@ -349,32 +414,43 @@ goo_mail_latest(const char* mail_imap_host,
   fclose(fp);
   fclose(fpb64);
 
-  BIO* b64 = BIO_new(BIO_f_base64());
-  BIO* src = BIO_new_file(tmpatt, "rb");
-  BIO* chain = BIO_push(b64, src);     
+  // 6. 将原始文件名还原（如果是编码过的原名，在此处解码）
+  decode_mime_filename(attname, raw_attname);
+  printf("[INFO] 成功提取到附件原始名称: [%s]\n", attname);
 
-  char dlpath[8192] = {'\0'};
-  strcpy(dlpath, download_dir);
-  strcat(dlpath, "/");
-  strcat(dlpath, attname);
-
-  unsigned char buf[4096];
-  int n;
-  fp = fopen(dlpath, "wb");
-  while ((n = BIO_read(chain, buf, sizeof(buf))) > 0) 
+  // 7. 解码 Base64 附件并保存到指定下载目录
+  if (strlen(attname) > 0)
   {
-    size_t written = fwrite(buf, 1, (size_t)n, fp);
-    if (written != (size_t)n) 
-    {
-      perror("fwrite");
-      BIO_free_all(chain);
-      fclose(fp);
-      return GOO_ERROR_FAILURE;
-    }
-  } 
-  BIO_free_all(chain);
-  fclose(fp);
+    BIO* b64 = BIO_new(BIO_f_base64());
+    BIO* src = BIO_new_file(tmpatt, "rb");
+    BIO* chain = BIO_push(b64, src);     
 
+    char dlpath[8192] = {'\0'};
+    snprintf(dlpath, sizeof(dlpath), "%s/%s", download_dir, attname);
+
+    unsigned char buf[4096];
+    int n;
+    fp = fopen(dlpath, "wb");
+    if (fp != NULL)
+    {
+      while ((n = BIO_read(chain, buf, sizeof(buf))) > 0) 
+      {
+        size_t written = fwrite(buf, 1, (size_t)n, fp);
+        if (written != (size_t)n) 
+        {
+          BIO_free_all(chain);
+          fclose(fp);
+          remove(tmpmail);
+          remove(tmpatt);
+          return GOO_ERROR_FAILURE;
+        }
+      } 
+      fclose(fp);
+    }
+    BIO_free_all(chain);
+  }
+
+  // 8. 清理临时缓存文件
   remove(tmpmail);
   remove(tmpatt);
 
