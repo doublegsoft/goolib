@@ -283,7 +283,6 @@ goo_mail_request(const char* mail_imap_url,
  
     curl_easy_cleanup(curl);
   }
- 
   curl_global_cleanup();
   return GOO_SUCCESS;
 }
@@ -354,7 +353,7 @@ goo_mail_latest(const char* mail_imap_host,
   char inbox_url[4096] = {'\0'};
   snprintf(inbox_url, sizeof(inbox_url), "imaps://%s/INBOX", mail_imap_host);
 
-  // 1. 查询收件箱中所有未读邮件的 UID
+  // 查询收件箱中所有未读邮件的 UID
   char search_buf[4096] = {'\0'};
   int status = goo_mail_request(inbox_url, 
                                 mail_imap_port,
@@ -366,8 +365,8 @@ goo_mail_latest(const char* mail_imap_host,
                                 error);
   if (status != GOO_SUCCESS)
     return status;
-
-  // 2. 提取最后一个 UID (即最新的一封未读邮件)
+  
+  // 提取最后一个 UID (即最新的一封未读邮件)
   long uid = -1;
   char* token = strtok(search_buf, " \r\n");
   while (token != NULL)
@@ -379,7 +378,6 @@ goo_mail_latest(const char* mail_imap_host,
     }
     token = strtok(NULL, " \r\n");
   }
-
   // 没有未读邮件
   if (uid <= 0) 
   {
@@ -423,7 +421,8 @@ goo_mail_latest(const char* mail_imap_host,
   }
 
   char* mail_body = goo_mail_body(tmpmail);
-  printf("%s\n", mail_body);
+  if (mail_body != NULL)
+    *body = mail_body;
 
   // 4. 将该邮件在服务端标记为已读 (\Seen)
   char store_cmd[128] = {'\0'};

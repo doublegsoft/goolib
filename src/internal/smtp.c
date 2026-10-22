@@ -1796,7 +1796,7 @@ smtp_tls_init(struct smtp *const smtp,
   if((smtp->flags & SMTP_NO_CERT_VERIFY) == 0){
     SSL_CTX_set_verify(smtp->tls_ctx, SSL_VERIFY_PEER, NULL);
   }
-
+  
   /*
    * Set the path to the user-provided CA file or use the default cert paths
    * if not provided.
@@ -1829,6 +1829,14 @@ smtp_tls_init(struct smtp *const smtp,
   SSL_set_bio(smtp->tls, smtp->tls_bio, smtp->tls_bio);
   SSL_set_connect_state(smtp->tls);
   if(SSL_connect(smtp->tls) != 1){
+    int err_code = SSL_get_error(smtp->tls, -1);
+    char err_buf[256];
+    ERR_error_string_n(ERR_get_error(), err_buf, sizeof(err_buf));
+    
+    printf("\n[ERROR] SSL_connect 失败!\n");
+    printf("OpenSSL Error Code: %d\n", err_code);
+    printf("OpenSSL Error Detail: %s\n\n", err_buf);
+
     SSL_CTX_free(smtp->tls_ctx);
     SSL_free(smtp->tls);
     return -1;
