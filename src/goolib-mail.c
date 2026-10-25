@@ -425,16 +425,16 @@ goo_mail_latest(const char* mail_imap_host,
     *body = mail_body;
 
   // 4. 将该邮件在服务端标记为已读 (\Seen)
-  char store_cmd[128] = {'\0'};
-  snprintf(store_cmd, sizeof(store_cmd), "UID STORE %ld +FLAGS (\\Seen)", uid);
-  goo_mail_request(inbox_url,
-                   mail_imap_port,
-                   mail_imap_user,
-                   mail_imap_password,
-                   store_cmd,
-                   NULL,
-                   NULL,
-                   NULL);
+  // char store_cmd[128] = {'\0'};
+  // snprintf(store_cmd, sizeof(store_cmd), "UID STORE %ld +FLAGS (\\Seen)", uid);
+  // goo_mail_request(inbox_url,
+  //                  mail_imap_port,
+  //                  mail_imap_user,
+  //                  mail_imap_password,
+  //                  store_cmd,
+  //                  NULL,
+  //                  NULL,
+  //                  NULL);
 
   // 5. 解析邮件原始文件，提取附件
   FILE* fpb64 = fopen(tmpatt, "w");
@@ -561,5 +561,32 @@ goo_mail_latest(const char* mail_imap_host,
   remove(tmpmail);
   remove(tmpatt);
 
+  return uid;
+}
+
+int 
+goo_mail_read(const char* mail_imap_host,
+              const char* mail_imap_port,
+              const char* mail_imap_user,
+              const char* mail_imap_password,
+              long        uid,
+              char**      error)
+{
+  if (uid < 0)
+    return GOO_ERROR_FAILURE;
+  
+  char inbox_url[4096] = {'\0'};
+  snprintf(inbox_url, sizeof(inbox_url), "imaps://%s/INBOX", mail_imap_host);
+
+  char store_cmd[128] = {'\0'};
+  snprintf(store_cmd, sizeof(store_cmd), "UID STORE %ld +FLAGS (\\Seen)", uid);
+  goo_mail_request(inbox_url,
+                   mail_imap_port,
+                   mail_imap_user,
+                   mail_imap_password,
+                   store_cmd,
+                   NULL,
+                   NULL,
+                   NULL);
   return GOO_SUCCESS;
 }

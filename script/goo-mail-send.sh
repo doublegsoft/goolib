@@ -3,4 +3,4 @@ export DYLD_LIBRARY_PATH=/Users/christian/export/local/works/doublegsoft.open/go
 
 build/darwin/goo-mail-send -s smtp.qq.com -p 465 -u 598807227@qq.com -a dxufwgbzlwghbehc \
   -f 598807227@qq.com -t 598807227@qq.com -j 账单PDF升级（全套） \
-  -m /Users/christian/Downloads/abpms-debug-1.0.jar.zip
+  -m /Users/christian/Downloads/Archive.zip
