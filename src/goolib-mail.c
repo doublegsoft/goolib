@@ -25,6 +25,15 @@
 #include "goolib-util.h"
 #include "goolib-mail.h"
 
+static const char* 
+get_filename(const char* path) {
+  if (!path) return "";
+  const char* slash = strrchr(path, '/');
+  const char* bslash = strrchr(path, '\\');
+  const char* name = slash > bslash ? slash : bslash;
+  return name ? (name + 1) : path;
+}
+
 /*!
 ** 解码 RFC 2047 MIME 编码的文件名（例如将 =?UTF-8?B?... 还原为真实的中文原文件名）
 */
@@ -325,10 +334,8 @@ goo_mail_send(const char* mail_smtp_host,
   
   if (attachment != NULL) 
   {
-    char* copy = strdup(attachment);
-    char* name = basename(copy);             
+    const char* name = get_filename(attachment);          
     smtp_attachment_add_path(smtp, name, attachment);
-    free(copy); 
   }
   rc = smtp_mail(smtp, body);
   if(rc != SMTP_STATUS_OK)

@@ -287,7 +287,7 @@ set(GFC_LIBRARIES                     gfc)
 ##                                    others                                  ##
 ##                                                                            ##
 ################################################################################
-set(OTHER_LIBRARY_DIR                 "/opt/homebrew/Cellar/fontconfig/2.18.1/lib")
+set(OTHER_LIBRARY_DIR                 "/opt/homebrew/Cellar/fontconfig/2.18.3/lib")
 set(OTHER_LIBRARIES                   z fontconfig archive)
 
 ################################################################################
