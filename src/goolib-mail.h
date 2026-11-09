@@ -65,7 +65,7 @@ goo_mail_send(const char* mail_smtp_host,
 **                           string if the operation fails. The caller is responsible for freeing 
 **                           this memory. Pass NULL if error messages are not required.
 **
-** @return int               Returns 0 on success, or a non-zero error code on failure.
+** @return int               Returns uid of the latest email on success, or a negative error code on failure.
 */
 int 
 goo_mail_latest(const char* mail_imap_host,
@@ -74,7 +74,33 @@ goo_mail_latest(const char* mail_imap_host,
                 const char* mail_imap_password,
                 const char* temp_dir,
                 const char* download_dir,
+                char**      body,
                 char**      error);
+
+/*!
+** Reads or marks a specific email as read from the IMAP server by its UID.
+**
+** This function connects to the specified IMAP server, authenticates with the provided
+** credentials, and accesses the email message corresponding to the given Unique Identifier (UID).
+**
+** @param mail_imap_host     The hostname or IP address of the IMAP server.
+** @param mail_imap_port     The port number of the IMAP server (e.g., "993").
+** @param mail_imap_user     The username used for IMAP authentication.
+** @param mail_imap_password The password associated with the IMAP user.
+** @param uid                The Unique Identifier (UID) of the email message on the IMAP server.
+** @param error              Pointer to a char* that will point to an allocated error message 
+**                           string if the operation fails. The caller is responsible for freeing 
+**                           this memory. Pass NULL if error messages are not required.
+**
+** @return int               Returns 0 on success, or a non-zero error code on failure.
+*/
+int 
+goo_mail_read(const char* mail_imap_host,
+              const char* mail_imap_port,
+              const char* mail_imap_user,
+              const char* mail_imap_password,
+              long        uid,
+              char**      error);
 
 #ifdef __cplusplus
 }
