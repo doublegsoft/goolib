@@ -23,6 +23,8 @@ elseif (APPLE)
   set(PLATFORM                          "darwin")
 elseif (UNIX)
   set(PLATFORM                          "linux")
+else()
+  set(PLATFORM                          "linux")
 endif()
 
 if(APPLE)
